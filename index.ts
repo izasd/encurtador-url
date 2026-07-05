@@ -54,6 +54,10 @@ const servidor = Bun.serve({
         return new Response(Bun.file("./public/index.html"));
     }
 
+    if (metodo === "GET" && caminho === "/app.js") {
+        return new Response(Bun.file("./public/app.js"));
+    }
+
     return erro("Rota não encontrada", 404);
     },
 });
