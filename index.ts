@@ -17,7 +17,8 @@ function erro(mensagem: string, status: number): Response {
 }
 
 const servidor = Bun.serve({
-    port: 3000,
+    // Desafio E: porta lida do arquivo .env pela variavel PORTA.
+    port: Number(Bun.env.PORTA ?? 3000),
 
     async fetch(req: Request): Promise<Response> {
         const url = new URL(req.url);
@@ -26,11 +27,22 @@ const servidor = Bun.serve({
 
     // POST /api/encurtar -> cria nova URL curta
     if (metodo === "POST" && caminho === "/api/encurtar") {
-        const corpo = await req.json() as { urlOriginal?: string };
+        // Desafio A: aceita codigo personalizado opcional no corpo da requisicao.
+        const corpo = await req.json() as { urlOriginal?: string; codigo?: string };
         if (!corpo.urlOriginal || !urlValida(corpo.urlOriginal)) {
         return erro("URL inválida. Forneça http:// ou https://", 400);
         }
-        const codigo = gerarCodigo();
+        // Desafio A: valida formato do codigo personalizado.
+        if (corpo.codigo && !/^[A-Za-z0-9]{4,10}$/.test(corpo.codigo)) {
+        return erro("Codigo deve ter apenas letras e numeros, de 4 a 10 caracteres", 400);
+        }
+
+        const codigo = corpo.codigo ?? gerarCodigo();
+        // Desafio A: retorna 409 Conflict se o codigo ja existir.
+        if (corpo.codigo && buscarPorCodigo(codigo)) {
+        return erro("Codigo ja existe", 409);
+        }
+
         const registro = inserirUrl(codigo, corpo.urlOriginal);
         return json(registro, 201);
     }

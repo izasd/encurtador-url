@@ -28,9 +28,19 @@ O servidor ficará disponível em:
 http://localhost:3000
 ```
 
+## Variaveis de ambiente
+
+O projeto le a porta pelo arquivo `.env`:
+
+```env
+PORTA=3000
+```
+
+Para alterar a porta, mude o valor de `PORTA` e reinicie o servidor.
+
 ## Rotas
 
 - `GET /` - abre a interface web
-- `POST /api/encurtar` - cria uma URL encurtada
+- `POST /api/encurtar` - cria uma URL encurtada. Aceita `codigo` opcional com 4 a 10 letras/numeros
 - `GET /api/urls` - lista as URLs cadastradas
 - `GET /:codigo` - redireciona para a URL original
