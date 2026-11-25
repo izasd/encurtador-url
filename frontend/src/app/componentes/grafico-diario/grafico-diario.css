@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.area-grafico {
+  position: relative;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+svg:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Grade e eixo: linhas finas e contínuas, um tom acima da superfície. */
+.grade {
+  stroke: var(--grade);
+  stroke-width: 1;
+}
+
+.base {
+  stroke: var(--eixo);
+  stroke-width: 1;
+}
+
+.rotulo-x,
+.rotulo-y {
+  fill: var(--texto-suave);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rotulo-y {
+  text-anchor: end;
+}
+
+.area {
+  fill: var(--serie-lavagem);
+}
+
+.linha {
+  fill: none;
+  stroke: var(--serie);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Ponto com anel da cor do cartão, para se destacar sobre a linha. */
+.ponto {
+  fill: var(--serie);
+  stroke: var(--cartao);
+  stroke-width: 2;
+}
+
+.rotulo-pico {
+  fill: var(--texto-secundario);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cursor {
+  stroke: var(--texto-suave);
+  stroke-width: 1;
+}
+
+.balao {
+  position: absolute;
+  display: grid;
+  gap: 2px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pequeno);
+  background: var(--cartao);
+  box-shadow: var(--sombra);
+  font-size: 0.8125rem;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.balao.abaixo {
+  transform: translate(-50%, 14px);
+}
+
+.balao strong {
+  font-size: 0.9375rem;
+  color: var(--texto);
+}
+
+.tabela-rolavel {
+  max-height: 20rem;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--borda);
+  text-align: left;
+}
+
+th:last-child,
+td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: var(--cartao);
+  font-weight: 600;
+  color: var(--texto-secundario);
+}

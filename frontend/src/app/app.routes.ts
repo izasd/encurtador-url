@@ -21,6 +21,12 @@ export const routes: Routes = [
     canActivate: [somenteAutenticado],
     loadComponent: () => import('./paginas/links/links').then((m) => m.Links),
   },
+  {
+    path: 'links/:codigo/estatisticas',
+    title: 'Estatísticas · Encurtador',
+    canActivate: [somenteAutenticado],
+    loadComponent: () => import('./paginas/estatisticas/estatisticas').then((m) => m.Estatisticas),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'links' },
   { path: '**', redirectTo: 'links' },
 ];

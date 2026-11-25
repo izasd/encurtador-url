@@ -1,0 +1,105 @@
+:host {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.voltar {
+  justify-self: start;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.voltar:hover {
+  text-decoration: underline;
+}
+
+.cabecalho-estatisticas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.identificacao {
+  display: grid;
+  gap: 0.25rem;
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.url-curta {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.url-original {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9375rem;
+  color: var(--texto-secundario);
+}
+
+/* O número de destaque da página: grande, na mesma fonte do resto e com algarismos proporcionais. */
+.total {
+  display: grid;
+  justify-items: end;
+}
+
+.total-numero {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.total-rotulo {
+  font-size: 0.9375rem;
+  color: var(--texto-secundario);
+}
+
+.grade-categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1.25rem;
+}
+
+.fuso {
+  margin-top: 0.75rem;
+}
+
+/* Ao recarregar, os gráficos anteriores continuam visíveis, só mais apagados. */
+.recarregando {
+  opacity: 0.6;
+}
+
+.vazio {
+  text-align: center;
+}
+
+.vazio h2 {
+  margin-bottom: 0.5rem;
+}
+
+.explicacao {
+  margin-top: 0.5rem;
+  color: var(--texto-secundario);
+}
+
+.estado {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+@media (max-width: 40rem) {
+  .total {
+    justify-items: start;
+  }
+
+  .total-numero {
+    font-size: 3rem;
+  }
+}

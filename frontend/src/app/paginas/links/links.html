@@ -37,12 +37,12 @@
   }
 
   @if (criado(); as link) {
-    <div class="alerta alerta-sucesso criado" role="status">
+    <output class="alerta alerta-sucesso criado">
       <span>Link criado: <a [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a></span>
       <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)">
         {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
       </button>
-    </div>
+    </output>
   }
 </section>
 
@@ -89,6 +89,8 @@
                 [attr.aria-expanded]="qrAberto() === link.codigo" [attr.aria-controls]="'qr-' + link.codigo">
                 QR Code
               </button>
+              <a class="botao botao-secundario botao-pequeno" [routerLink]="['/links', link.codigo, 'estatisticas']"
+                [attr.aria-label]="'Estatísticas de ' + link.urlCurta">Estatísticas</a>
             </div>
           </div>
 

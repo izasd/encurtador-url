@@ -1,0 +1,74 @@
+<div class="cabecalho">
+  <h2>{{ titulo() }}</h2>
+  <button type="button" class="link-botao" (click)="mostrarTabela.set(!mostrarTabela())">
+    {{ mostrarTabela() ? 'Ver gráfico' : 'Ver tabela' }}
+  </button>
+</div>
+
+@if (mostrarTabela()) {
+  <div class="tabela-rolavel">
+    <table>
+      <caption class="visualmente-oculto">{{ titulo() }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Dia</th>
+          <th scope="col">Cliques</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (dia of dias(); track dia.dia) {
+          <tr>
+            <td>{{ dia.dia | date: 'EEE, dd/MM/yyyy' }}</td>
+            <td>{{ dia.cliques | number }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <div class="area-grafico">
+    <svg [attr.width]="largura()" [attr.height]="altura" [attr.viewBox]="'0 0 ' + largura() + ' ' + altura"
+      role="img" tabindex="0" [attr.aria-label]="descricao()"
+      (pointermove)="mover($event)" (pointerdown)="mover($event)" (pointerleave)="ativo.set(null)"
+      (focus)="focar()" (blur)="ativo.set(null)" (keydown)="tecla($event)">
+
+      @for (marca of escala().marcas; track marca) {
+        <line [class]="marca === 0 ? 'base' : 'grade'" [attr.x1]="escala().x0" [attr.x2]="escala().x1"
+          [attr.y1]="nitida(escala().y(marca))" [attr.y2]="nitida(escala().y(marca))" />
+        <text class="rotulo-y" [attr.x]="escala().x0 - 8" [attr.y]="escala().y(marca)" dy="0.32em">
+          {{ marca | number }}
+        </text>
+      }
+
+      <path class="area" [attr.d]="caminhos().area" />
+      <path class="linha" [attr.d]="caminhos().linha" />
+
+      @for (rotulo of rotulosX(); track rotulo.indice) {
+        <text class="rotulo-x" [attr.x]="escala().x(rotulo.indice)" [attr.y]="altura - 10"
+          [attr.text-anchor]="rotulo.ancora">{{ rotulo.dia | date: 'dd/MM' }}</text>
+      }
+
+      @if (pico(); as p) {
+        <circle class="ponto" [attr.cx]="escala().x(p.indice)" [attr.cy]="escala().y(p.valor)" r="4" />
+        <text class="rotulo-pico" [attr.x]="escala().x(p.indice)" [attr.y]="escala().y(p.valor) - 10"
+          [attr.text-anchor]="p.ancora">{{ p.valor | number }}</text>
+      }
+
+      @if (pontoAtivo(); as p) {
+        <line class="cursor" [attr.x1]="nitida(p.x)" [attr.x2]="nitida(p.x)" [attr.y1]="escala().y1"
+          [attr.y2]="escala().y0" />
+        <circle class="ponto" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
+      }
+    </svg>
+
+    @if (pontoAtivo(); as p) {
+      <div class="balao" [class.abaixo]="p.y < 80" aria-hidden="true" [style.left.px]="posicaoDoBalao(p.x)"
+        [style.top.px]="p.y">
+        <strong>{{ p.cliques | number }} {{ p.cliques === 1 ? 'clique' : 'cliques' }}</strong>
+        <span>{{ p.dia | date: 'EEE, d MMM' }}</span>
+      </div>
+    }
+  </div>
+
+  <p class="visualmente-oculto" aria-live="polite">{{ anuncio() }}</p>
+}

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { QrCode } from '../../componentes/qr-code/qr-code';
 import { Link } from '../../nucleo/api';
@@ -20,7 +20,7 @@ function codigoValido(controle: AbstractControl<string>): ValidationErrors | nul
 
 @Component({
   selector: 'app-links',
-  imports: [DatePipe, ReactiveFormsModule, QrCode],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink, QrCode],
   templateUrl: './links.html',
   styleUrl: './links.css',
 })
