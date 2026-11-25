@@ -6,6 +6,8 @@ namespace Encurtador.Api.Links;
 
 public static class LinkEndpoints
 {
+    private const int MaximoDeTentativasDeCodigo = 5;
+
     public static IEndpointRouteBuilder MapLinkEndpoints(this IEndpointRouteBuilder app)
     {
         var links = app.MapGroup("/api/links").WithTags("Links");
@@ -38,16 +40,53 @@ public static class LinkEndpoints
             });
         }
 
-        var link = new Link
+        var criadoEm = DateTime.UtcNow;
+
+        // Com 62^6 combinações uma colisão é raríssima, mas se o código gerado
+        // já existir, outro é gerado no lugar.
+        for (var tentativa = 1; tentativa <= MaximoDeTentativasDeCodigo; tentativa++)
         {
-            Codigo = GeradorDeCodigo.Gerar(),
-            UrlOriginal = urlOriginal,
-            CriadoEm = DateTime.UtcNow,
-        };
+            var link = new Link { Codigo = GeradorDeCodigo.Gerar(), UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+
+            if (await TentarSalvarAsync(db, link, ct))
+            {
+                return Criado(link, http);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Não foi possível gerar um código livre em {MaximoDeTentativasDeCodigo} tentativas.");
+    }
+
+    /// <summary>
+    /// Salva o link se o código estiver livre. Retorna false se o código já estiver em uso.
+    /// </summary>
+    private static async Task<bool> TentarSalvarAsync(AppDbContext db, Link link, CancellationToken ct)
+    {
+        // Verifica antes de salvar: é o caminho comum e não depende de exceção.
+        if (await db.Links.AnyAsync(l => l.Codigo == link.Codigo, ct))
+        {
+            return false;
+        }
 
         db.Links.Add(link);
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+            return true;
+        }
+        catch (DbUpdateException ex) when (ex.EhViolacaoDeUnicidade())
+        {
+            // Outra requisição salvou o mesmo código entre a verificação e o INSERT.
+            // O índice único garante que só uma vence; esta tira o link do contexto
+            // para que ele não seja reenviado no próximo SaveChanges.
+            db.Entry(link).State = EntityState.Detached;
+            return false;
+        }
+    }
 
+    private static Created<LinkResponse> Criado(Link link, HttpRequest http)
+    {
         var resposta = ParaResposta(link, http);
         return TypedResults.Created(resposta.UrlCurta, resposta);
     }
