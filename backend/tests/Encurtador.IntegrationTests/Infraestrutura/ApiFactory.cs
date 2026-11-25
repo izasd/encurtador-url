@@ -20,8 +20,6 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     private readonly PostgreSqlContainer _banco = new PostgreSqlBuilder(ImagemDoBanco).Build();
 
-    private int _ultimoIp;
-
     public string ConnectionString => _banco.GetConnectionString();
 
     public async Task InitializeAsync()
@@ -47,26 +45,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.ConfigureTestServices(services => services.AddSingleton<IStartupFilter, IpDoClienteDeTeste>());
     }
 
-    /// <summary>
-    /// Cliente HTTP com um endereço IP só dele, para que os limites por IP de um teste
-    /// não interfiram nos outros. Não segue redirecionamentos, para os testes verem o 302.
-    /// </summary>
-    public HttpClient CriarCliente()
-    {
-        var cliente = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        cliente.DefaultRequestHeaders.Add(IpDoClienteDeTeste.Cabecalho, NovoIp());
-        return cliente;
-    }
-
     /// <summary>Acesso direto ao banco, para preparar cenários e conferir o que a API gravou.</summary>
     public AppDbContext CriarDbContext() => CriarDbContext(ConnectionString);
 
     public static AppDbContext CriarDbContext(string connectionString) =>
         new(new DbContextOptionsBuilder<AppDbContext>().UseNpgsql(connectionString).Options);
-
-    private string NovoIp()
-    {
-        var n = Interlocked.Increment(ref _ultimoIp);
-        return $"10.{(n >> 16) & 255}.{(n >> 8) & 255}.{n & 255}";
-    }
 }

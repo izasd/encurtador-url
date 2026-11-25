@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Hospedagem;
 using Encurtador.Api.Limites;
 using Encurtador.Api.Links;
 using Encurtador.Api.Usuarios;
@@ -55,10 +56,15 @@ builder.Services.AddLimitesDeRequisicao();
 // Verificação de saúde para a hospedagem: a API está de pé e consegue falar com o banco.
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
+// IP do visitante e HTTPS repassados pelo proxy da hospedagem (ver Hospedagem/ProxyReverso.cs).
+builder.Services.AddProxyReverso(builder.Configuration);
+
 var app = builder.Build();
 
 // Nos contêineres, o banco é atualizado aqui, antes de a API começar a atender.
 await app.AplicarMigracoesSeConfiguradoAsync();
+
+app.UseProxyReverso();
 
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota
 // inexistente) ganham um corpo ProblemDetails.

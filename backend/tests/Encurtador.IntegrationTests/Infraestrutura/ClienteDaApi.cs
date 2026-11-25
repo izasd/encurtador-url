@@ -7,6 +7,7 @@ using Encurtador.Api.Cliques;
 using Encurtador.Api.Links;
 using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Encurtador.IntegrationTests.Infraestrutura;
 
@@ -21,12 +22,26 @@ internal static class ClienteDaApi
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
+    private static int _ultimoIp;
+
     public static string EmailUnico() => $"{Guid.NewGuid():N}@teste.com";
 
     public static string CodigoUnico() => GeradorDeCodigo.Gerar(Link.TamanhoMaximoCodigo);
 
+    /// <summary>
+    /// Cliente HTTP com um endereço IP só dele, para que os limites por IP de um teste
+    /// não interfiram nos outros. Não segue redirecionamentos, para os testes verem o 302.
+    /// </summary>
+    public static HttpClient CriarCliente(this WebApplicationFactory<Program> api)
+    {
+        var n = Interlocked.Increment(ref _ultimoIp);
+        var cliente = api.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        cliente.DefaultRequestHeaders.Add(IpDoClienteDeTeste.Cabecalho, $"10.{(n >> 16) & 255}.{(n >> 8) & 255}.{n & 255}");
+        return cliente;
+    }
+
     /// <summary>Cria uma conta com e-mail novo e devolve um cliente já autenticado com o token dela.</summary>
-    public static async Task<HttpClient> CriarUsuarioAsync(this ApiFactory api)
+    public static async Task<HttpClient> CriarUsuarioAsync(this WebApplicationFactory<Program> api)
     {
         var cliente = api.CriarCliente();
         var email = EmailUnico();

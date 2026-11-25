@@ -56,8 +56,8 @@ public static class LimitesDeRequisicao
             QueueLimit = 0,
         });
 
-    // Atrás de um proxy reverso, este é o IP do proxy: em produção é preciso configurar os
-    // cabeçalhos encaminhados (X-Forwarded-For) para cada visitante ter o seu próprio limite.
+    // Atrás de um proxy reverso, só é o IP do visitante com a seção "ProxyReverso" ligada
+    // (ver Hospedagem/ProxyReverso.cs); senão seria o IP do proxy, igual para todo mundo.
     private static string EnderecoIp(HttpContext http) => http.Connection.RemoteIpAddress?.ToString() ?? "desconhecido";
 
     private static async ValueTask ResponderLimiteAtingidoAsync(OnRejectedContext contexto, CancellationToken ct)
