@@ -15,4 +15,7 @@ public class User
     public required string SenhaHash { get; set; }
 
     public DateTime CriadoEm { get; set; }
+
+    /// <summary>Conta temporária criada por "entrar como visitante"; é apagada depois de 24 horas.</summary>
+    public bool EhVisitante { get; set; }
 }

@@ -38,6 +38,9 @@ builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddAutenticacaoJwt(builder.Configuration);
 
+// Contas de visitante ("entrar como visitante") são apagadas depois de 24 horas.
+builder.Services.AddHostedService<LimpezaDeVisitantes>();
+
 var app = builder.Build();
 
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota

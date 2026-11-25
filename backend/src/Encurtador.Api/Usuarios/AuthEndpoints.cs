@@ -25,7 +25,19 @@ public static class AuthEndpoints
             .WithSummary("Confere e-mail e senha e devolve um token JWT")
             .ProducesProblem(StatusCodes.Status401Unauthorized);
 
+        auth.MapPost("/visitante", EntrarComoVisitante)
+            .WithSummary("Cria uma conta temporária de visitante, com dados de exemplo, e devolve um token JWT");
+
         return app;
+    }
+
+    private static async Task<Ok<LoginResponse>> EntrarComoVisitante(
+        AppDbContext db, IPasswordHasher<User> hasher, GeradorDeToken tokens, TimeProvider relogio, CancellationToken ct)
+    {
+        var visitante = await DadosDeExemplo.CriarVisitanteAsync(db, hasher, relogio.GetUtcNow().UtcDateTime, ct);
+
+        var token = tokens.Gerar(visitante);
+        return TypedResults.Ok(new LoginResponse(token.Token, token.ExpiraEm, UsuarioResponse.De(visitante)));
     }
 
     private static async Task<Results<Ok<LoginResponse>, ProblemHttpResult>> Login(
@@ -58,7 +70,7 @@ public static class AuthEndpoints
         }
 
         var token = tokens.Gerar(usuario);
-        return TypedResults.Ok(new LoginResponse(token.Token, token.ExpiraEm, new UsuarioResponse(usuario.Nome, usuario.Email)));
+        return TypedResults.Ok(new LoginResponse(token.Token, token.ExpiraEm, UsuarioResponse.De(usuario)));
     }
 
     // A mesma mensagem para e-mail inexistente e senha errada, para não revelar quem tem conta.
@@ -115,7 +127,7 @@ public static class AuthEndpoints
             return EmailEmUso();
         }
 
-        return TypedResults.Created((string?)null, new UsuarioResponse(usuario.Nome, usuario.Email));
+        return TypedResults.Created((string?)null, UsuarioResponse.De(usuario));
     }
 
     private static ProblemHttpResult EmailEmUso() =>
