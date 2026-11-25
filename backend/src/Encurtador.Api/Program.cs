@@ -1,6 +1,8 @@
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
 using Encurtador.Api.Links;
+using Encurtador.Api.Usuarios;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,9 @@ builder.Services.AddSingleton<FilaDeCliques>();
 builder.Services.AddHostedService<GravadorDeCliques>();
 builder.Services.AddSingleton<FusosHorarios>();
 
+// Hash de senha do ASP.NET Core Identity: PBKDF2 com HMAC-SHA512, salt aleatório e 100 mil iterações.
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+
 var app = builder.Build();
 
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota
@@ -43,6 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapAuthEndpoints();
 app.MapLinkEndpoints();
 app.MapEstatisticasEndpoints();
 

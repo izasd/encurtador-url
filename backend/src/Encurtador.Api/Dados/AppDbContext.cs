@@ -1,16 +1,25 @@
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Links;
+using Encurtador.Api.Usuarios;
 using Microsoft.EntityFrameworkCore;
 
 namespace Encurtador.Api.Dados;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<User> Users => Set<User>();
     public DbSet<Link> Links => Set<Link>();
     public DbSet<Click> Clicks => Set<Click>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(usuario =>
+        {
+            usuario.Property(u => u.Nome).HasMaxLength(User.TamanhoMaximoNome);
+            usuario.Property(u => u.Email).HasMaxLength(User.TamanhoMaximoEmail);
+            usuario.HasIndex(u => u.Email).IsUnique();
+        });
+
         modelBuilder.Entity<Link>(link =>
         {
             link.Property(l => l.Codigo).HasMaxLength(Link.TamanhoMaximoCodigo);

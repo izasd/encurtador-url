@@ -1,5 +1,15 @@
 @Encurtador.Api_HostAddress = http://localhost:5198
 
+### Cria uma conta
+POST {{Encurtador.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza",
+  "email": "ana@exemplo.com",
+  "senha": "senha-forte-123"
+}
+
 ### Cria um link curto
 # @name criarLink
 POST {{Encurtador.Api_HostAddress}}/api/links
