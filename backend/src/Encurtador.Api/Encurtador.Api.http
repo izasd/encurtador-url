@@ -61,6 +61,38 @@ Accept: application/json
 GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=Lua/Crateras
 Authorization: Bearer {{login.response.body.$.token}}
 
+### Desativa o link criado acima (o redirecionamento passa a responder 410)
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "ativo": false
+}
+
+### Reativa e define uma expiração (ISO 8601 com fuso)
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "ativo": true,
+  "expiraEm": "2026-12-31T23:59:59-03:00"
+}
+
+### Remove a expiração (null) sem mexer no resto
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/merge-patch+json
+
+{
+  "expiraEm": null
+}
+
+### Exclui o link e as estatísticas dele -> 204
+DELETE {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+
 ### Cria um link com código personalizado (4 a 10 letras/números)
 POST {{Encurtador.Api_HostAddress}}/api/links
 Authorization: Bearer {{login.response.body.$.token}}

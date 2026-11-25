@@ -23,6 +23,14 @@ public static class LinkEndpoints
         links.MapGet("/", ListarLinks)
             .WithSummary("Lista os links do usuário, do mais recente para o mais antigo");
 
+        links.MapPatch("/{codigo:codigoCurto}", AtualizarLink)
+            .WithSummary("Ativa, desativa ou muda a expiração de um link (JSON Merge Patch)")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        links.MapDelete("/{codigo:codigoCurto}", ExcluirLink)
+            .WithSummary("Exclui um link e as estatísticas dele")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         app.MapGet("/{codigo:codigoCurto}", Redirecionar)
             .WithTags("Redirecionamento")
             .WithSummary("Redireciona para a URL original")
@@ -151,6 +159,58 @@ public static class LinkEndpoints
         return TypedResults.Ok(links.Select(l => ParaResposta(l, http, agora)).ToList());
     }
 
+    private static async Task<Results<Ok<LinkResponse>, ValidationProblem, ProblemHttpResult>> AtualizarLink(
+        string codigo, AtualizarLinkRequest requisicao, AppDbContext db, HttpRequest http, ClaimsPrincipal usuario,
+        TimeProvider relogio, CancellationToken ct)
+    {
+        var agora = relogio.GetUtcNow().UtcDateTime;
+
+        if (!requisicao.TentarInterpretar(agora, out var alteracoes, out var erro))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["expiraEm"] = [erro] });
+        }
+
+        var userId = usuario.ObterIdDoUsuario();
+        var link = await db.Links.FirstOrDefaultAsync(l => l.Codigo == codigo && l.UserId == userId, ct);
+
+        // Link de outro usuário recebe o mesmo 404 de código inexistente, para não revelar que existe.
+        if (link is null)
+        {
+            return NaoEncontrado(codigo);
+        }
+
+        if (alteracoes.Ativo is bool ativo)
+        {
+            link.Ativo = ativo;
+        }
+
+        if (alteracoes.MudaExpiracao)
+        {
+            link.ExpiraEm = alteracoes.ExpiraEm;
+        }
+
+        await db.SaveChangesAsync(ct);
+        return TypedResults.Ok(ParaResposta(link, http, agora));
+    }
+
+    private static async Task<Results<NoContent, ProblemHttpResult>> ExcluirLink(
+        string codigo, AppDbContext db, ClaimsPrincipal usuario, CancellationToken ct)
+    {
+        var userId = usuario.ObterIdDoUsuario();
+
+        // Um DELETE só no banco; os cliques do link saem junto, pela exclusão em cascata.
+        var excluidos = await db.Links
+            .Where(l => l.Codigo == codigo && l.UserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        return excluidos == 0 ? NaoEncontrado(codigo) : TypedResults.NoContent();
+    }
+
+    private static ProblemHttpResult NaoEncontrado(string codigo) =>
+        TypedResults.Problem(
+            detail: $"Nenhum link encontrado com o código '{codigo}'.",
+            statusCode: StatusCodes.Status404NotFound);
+
     private static async Task<Results<RedirectHttpResult, ProblemHttpResult>> Redirecionar(
         string codigo, AppDbContext db, FilaDeCliques fila, HttpRequest http, TimeProvider relogio, CancellationToken ct)
     {
@@ -162,9 +222,7 @@ public static class LinkEndpoints
 
         if (link is null)
         {
-            return TypedResults.Problem(
-                detail: $"Nenhum link encontrado com o código '{codigo}'.",
-                statusCode: StatusCodes.Status404NotFound);
+            return NaoEncontrado(codigo);
         }
 
         // Desativado ou expirado: 410 (o link existe, mas foi tirado do ar de propósito).
