@@ -39,6 +39,15 @@ public class ConexaoDoBancoTests
         Assert.Equal(SslMode.Prefer, conexao.SslMode);
     }
 
+    [Fact]
+    public void Normalizar_UrlSemSenha_DeixaASenhaEmBranco()
+    {
+        var conexao = new NpgsqlConnectionStringBuilder(ConexaoDoBanco.Normalizar("postgresql://ana@db.exemplo.com/encurtador"));
+
+        Assert.Equal("ana", conexao.Username);
+        Assert.Null(conexao.Password);
+    }
+
     [Theory]
     [InlineData("disable", SslMode.Disable)]
     [InlineData("require", SslMode.Require)]
