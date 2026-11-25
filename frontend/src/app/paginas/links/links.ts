@@ -12,6 +12,12 @@ import { urlLegivel } from '../../nucleo/url';
 
 type Campo = 'urlOriginal' | 'codigo';
 
+/** Data no formato do campo de data (aaaa-mm-dd), no fuso de quem está usando. */
+function dataLocal(data: Date): string {
+  const doisDigitos = (n: number) => String(n).padStart(2, '0');
+  return `${data.getFullYear()}-${doisDigitos(data.getMonth() + 1)}-${doisDigitos(data.getDate())}`;
+}
+
 /** Mesma regra da API (ValidadorDeCodigo.cs): vazio ou de 4 a 10 letras e números. */
 function codigoValido(controle: AbstractControl<string>): ValidationErrors | null {
   const codigo = controle.value.trim();
@@ -50,6 +56,14 @@ export class Links {
   protected readonly qrAberto = signal<string | null>(null);
   private readonly errosDaApi = signal<Partial<Record<Campo, string>>>({});
   private temporizadorDaCopia?: ReturnType<typeof setTimeout>;
+
+  // Gerenciamento de um link (painel "Gerenciar"): só um painel aberto por vez.
+  protected readonly gerenciando = signal<string | null>(null);
+  protected readonly confirmandoExclusao = signal<string | null>(null);
+  protected readonly salvando = signal<string | null>(null);
+  protected readonly erroDaAcao = signal<{ codigo: string; mensagem: string } | null>(null);
+  protected readonly hoje = dataLocal(new Date());
+  protected readonly dataLocal = (iso: string | null) => (iso ? dataLocal(new Date(iso)) : '');
 
   protected async criar(): Promise<void> {
     if (this.formulario.invalid) {
@@ -100,6 +114,64 @@ export class Links {
 
   protected alternarQr(codigo: string): void {
     this.qrAberto.update((aberto) => (aberto === codigo ? null : codigo));
+  }
+
+  protected alternarGerenciar(codigo: string): void {
+    this.gerenciando.update((aberto) => (aberto === codigo ? null : codigo));
+    this.confirmandoExclusao.set(null);
+    this.erroDaAcao.set(null);
+  }
+
+  protected async alterarAtivo(link: Link, ativo: boolean): Promise<void> {
+    await this.atualizar(link, { ativo });
+  }
+
+  /** A data escolhida vale até o fim daquele dia, no fuso de quem está usando. */
+  protected async salvarExpiracao(link: Link, data: string): Promise<void> {
+    const expiraEm = new Date(`${data}T23:59:59`);
+    if (!data || Number.isNaN(expiraEm.getTime()) || expiraEm <= new Date()) {
+      this.erroDaAcao.set({ codigo: link.codigo, mensagem: 'Escolha hoje ou uma data futura.' });
+      return;
+    }
+
+    await this.atualizar(link, { expiraEm: expiraEm.toISOString() });
+  }
+
+  protected async removerExpiracao(link: Link): Promise<void> {
+    await this.atualizar(link, { expiraEm: null });
+  }
+
+  protected async excluir(link: Link): Promise<void> {
+    await this.executarAcao(link, 'Não foi possível excluir o link.', async () => {
+      await firstValueFrom(this.http.delete(`/api/links/${encodeURIComponent(link.codigo)}`));
+      this.gerenciando.set(null);
+      if (this.criado()?.codigo === link.codigo) {
+        this.criado.set(null);
+      }
+    });
+  }
+
+  /** Envia só o que muda (JSON Merge Patch): "expiraEm": null remove a expiração. */
+  private async atualizar(link: Link, mudancas: { ativo?: boolean; expiraEm?: string | null }): Promise<void> {
+    await this.executarAcao(link, 'Não foi possível salvar a alteração.', async () => {
+      await firstValueFrom(this.http.patch<Link>(`/api/links/${encodeURIComponent(link.codigo)}`, mudancas));
+    });
+  }
+
+  private async executarAcao(link: Link, mensagemPadrao: string, acao: () => Promise<void>): Promise<void> {
+    this.salvando.set(link.codigo);
+    this.erroDaAcao.set(null);
+
+    try {
+      await acao();
+      this.confirmandoExclusao.set(null);
+      this.links.reload();
+    } catch (erro) {
+      const erros = lerErros(erro, mensagemPadrao);
+      this.erroDaAcao.set({ codigo: link.codigo, mensagem: erros.campos['expiraEm'] ?? erros.geral ?? mensagemPadrao });
+    } finally {
+      this.salvando.set(null);
+    }
   }
 
   /** Mensagem de erro do campo: primeiro a da API, depois a da validação local. */

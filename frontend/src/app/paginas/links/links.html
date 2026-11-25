@@ -72,10 +72,25 @@
   } @else {
     <ul class="lista" [class.recarregando]="links.isLoading()">
       @for (link of itens(); track link.codigo) {
-        <li class="item">
+        <li class="item" [class.fora-do-ar]="link.situacao !== 'disponivel'">
           <div class="item-linha">
             <div class="item-textos">
-              <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+              <span class="linha-titulo">
+                <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+                @switch (link.situacao) {
+                  @case ('desativado') {
+                    <span class="selo">Desativado</span>
+                  }
+                  @case ('expirado') {
+                    <span class="selo">Expirado</span>
+                  }
+                  @default {
+                    @if (link.expiraEm) {
+                      <span class="selo">Expira em {{ link.expiraEm | date: 'dd/MM/yyyy' }}</span>
+                    }
+                  }
+                }
+              </span>
               <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
               <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
             </div>
@@ -91,11 +106,62 @@
               </button>
               <a class="botao botao-secundario botao-pequeno" [routerLink]="['/links', link.codigo, 'estatisticas']"
                 [attr.aria-label]="'Estatísticas de ' + link.urlCurta">Estatísticas</a>
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="alternarGerenciar(link.codigo)"
+                [attr.aria-expanded]="gerenciando() === link.codigo" [attr.aria-controls]="'gerenciar-' + link.codigo">
+                Gerenciar
+              </button>
             </div>
           </div>
 
+          @if (gerenciando() === link.codigo) {
+            <div class="painel painel-gerenciar" [id]="'gerenciar-' + link.codigo">
+              <div class="grupo">
+                <label class="opcao">
+                  <input #ativo type="checkbox" [checked]="link.ativo" [disabled]="salvando() === link.codigo"
+                    (change)="alterarAtivo(link, ativo.checked)">
+                  Link ativo
+                </label>
+                <p class="dica">Desativado, o link curto deixa de redirecionar e os cliques não são contados.</p>
+              </div>
+
+              <div class="grupo">
+                <label [for]="'expira-' + link.codigo">Expira no fim do dia</label>
+                <div class="linha-expiracao">
+                  <input #data type="date" [id]="'expira-' + link.codigo" [min]="hoje" [value]="dataLocal(link.expiraEm)">
+                  <button type="button" class="botao botao-secundario botao-pequeno" [disabled]="salvando() === link.codigo"
+                    (click)="salvarExpiracao(link, data.value)">Salvar data</button>
+                  @if (link.expiraEm) {
+                    <button type="button" class="link-botao" [disabled]="salvando() === link.codigo"
+                      (click)="removerExpiracao(link)">Remover expiração</button>
+                  }
+                </div>
+              </div>
+
+              @if (erroDaAcao(); as erro) {
+                @if (erro.codigo === link.codigo) {
+                  <p class="erro-campo" role="alert">{{ erro.mensagem }}</p>
+                }
+              }
+
+              <div class="grupo zona-exclusao">
+                @if (confirmandoExclusao() === link.codigo) {
+                  <p>Excluir este link de vez? As estatísticas dele também serão apagadas.</p>
+                  <div class="acoes">
+                    <button type="button" class="botao botao-perigo botao-pequeno" [disabled]="salvando() === link.codigo"
+                      (click)="excluir(link)">Excluir</button>
+                    <button type="button" class="botao botao-secundario botao-pequeno"
+                      (click)="confirmandoExclusao.set(null)">Cancelar</button>
+                  </div>
+                } @else {
+                  <button type="button" class="botao botao-perigo-contorno botao-pequeno"
+                    (click)="confirmandoExclusao.set(link.codigo)">Excluir link</button>
+                }
+              </div>
+            </div>
+          }
+
           @if (qrAberto() === link.codigo) {
-            <div class="painel-qr" [id]="'qr-' + link.codigo">
+            <div class="painel" [id]="'qr-' + link.codigo">
               <!-- O código do gerador de QR Code só é baixado quando o primeiro painel é aberto. -->
               @defer (on immediate) {
                 <app-qr-code [texto]="link.urlCurta" [nomeArquivo]="'qrcode-' + link.codigo + '.png'" />

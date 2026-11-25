@@ -95,9 +95,32 @@
   flex: 1 1 18rem;
 }
 
+.linha-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
 .url-curta {
   font-weight: 600;
   overflow-wrap: anywhere;
+}
+
+/* Links desativados ou expirados ficam mais apagados; o selo diz o motivo. */
+.fora-do-ar .url-curta {
+  color: var(--texto-secundario);
+}
+
+.selo {
+  padding: 0.0625rem 0.5rem;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--realce);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  white-space: nowrap;
 }
 
 .url-original {
@@ -119,11 +142,56 @@
   gap: 0.5rem;
 }
 
-.painel-qr {
+.painel {
+  display: grid;
+  gap: 1rem;
   margin-top: 0.875rem;
   padding: 1rem;
   border-radius: var(--raio-pequeno);
   background: var(--realce);
+}
+
+.grupo {
+  display: grid;
+  justify-items: start; /* botões e campos no tamanho do conteúdo, não esticados */
+  gap: 0.375rem;
+}
+
+.grupo label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.opcao input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--marca);
+}
+
+.linha-expiracao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.linha-expiracao input {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--eixo);
+  border-radius: var(--raio-pequeno);
+  background: var(--cartao);
+  color: var(--texto);
+}
+
+.zona-exclusao {
+  padding-top: 1rem;
+  border-top: 1px solid var(--borda);
 }
 
 @media (max-width: 40rem) {

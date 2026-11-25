@@ -12,11 +12,18 @@ export interface LoginResposta {
   usuario: Usuario;
 }
 
+export type SituacaoDoLink = 'disponivel' | 'desativado' | 'expirado';
+
 export interface Link {
   codigo: string;
   urlOriginal: string;
   urlCurta: string;
   criadoEm: string;
+  ativo: boolean;
+  /** Instante (UTC) em que o link para de redirecionar; null quando não expira. */
+  expiraEm: string | null;
+  /** Calculada pela API, para não depender do relógio do navegador. */
+  situacao: SituacaoDoLink;
 }
 
 export interface CliquesPorDia {

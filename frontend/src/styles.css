@@ -21,6 +21,7 @@
   --foco: #1a8870;
   --erro: #b3261e;
   --erro-fundo: #fdeceb;
+  --texto-sobre-erro: #ffffff;
   --aviso: #6b4e00;
   --aviso-fundo: #fff6dc;
   --sucesso-fundo: #e6f4ef;
@@ -54,6 +55,7 @@
     --foco: #5ccfb1;
     --erro: #ff8f85;
     --erro-fundo: #3a1f1d;
+    --texto-sobre-erro: #2a0b08;
     --aviso: #f3d27a;
     --aviso-fundo: #2d2714;
     --sucesso-fundo: #12302a;
@@ -194,6 +196,23 @@ input {
 
 .botao-secundario:hover {
   background: var(--realce);
+}
+
+/* Ações destrutivas (excluir). */
+.botao-perigo,
+.botao-perigo:hover {
+  background: var(--erro);
+  color: var(--texto-sobre-erro);
+}
+
+.botao-perigo-contorno {
+  background: transparent;
+  color: var(--erro);
+  border-color: currentColor;
+}
+
+.botao-perigo-contorno:hover {
+  background: var(--erro-fundo);
 }
 
 .botao-pequeno {
