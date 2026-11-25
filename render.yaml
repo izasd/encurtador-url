@@ -1,0 +1,33 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec): um serviço web gratuito que roda a
+# imagem do Dockerfile, com a API e o site Angular. O PostgreSQL fica fora do Render, no Neon.
+services:
+  - type: web
+    name: encurtador
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/saude
+    # Só publica um commit depois que o GitHub Actions aprovar.
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - Dockerfile
+        - .dockerignore
+        - backend/src/**
+        - frontend/**
+    envVars:
+      # Endereço do banco no Neon (postgresql://...), informado ao criar o Blueprint.
+      - key: ConnectionStrings__Encurtador
+        sync: false
+      # Segredo aleatório de 256 bits para assinar os tokens, gerado pelo próprio Render.
+      - key: Jwt__Chave
+        generateValue: true
+      - key: Banco__AplicarMigracoesAoIniciar
+        value: "true"
+      # As requisições chegam pelo proxy do Render, que informa o IP do visitante e o https.
+      - key: ProxyReverso__Habilitado
+        value: "true"
+      # Porta em que a imagem do ASP.NET Core escuta.
+      - key: PORT
+        value: "8080"
