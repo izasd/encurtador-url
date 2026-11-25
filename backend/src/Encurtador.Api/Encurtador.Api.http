@@ -10,7 +10,7 @@ Content-Type: application/json
   "senha": "senha-forte-123"
 }
 
-### Entra e recebe o token JWT
+### Entra e recebe o token JWT (as requisições de links abaixo usam este token)
 # @name login
 POST {{Encurtador.Api_HostAddress}}/api/auth/login
 Content-Type: application/json
@@ -32,30 +32,38 @@ Content-Type: application/json
 ### Cria um link curto
 # @name criarLink
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
   "urlOriginal": "https://learn.microsoft.com/dotnet/"
 }
 
-### Lista os links (mais recentes primeiro)
+### Lista os links do usuário (mais recentes primeiro)
 GET {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Accept: application/json
 
-### Redireciona para a URL original (usa o código criado acima) e registra o clique
+### Sem token -> 401
+GET {{Encurtador.Api_HostAddress}}/api/links
+
+### Redireciona para a URL original (público, sem token) e registra o clique
 GET {{Encurtador.Api_HostAddress}}/{{criarLink.response.body.$.codigo}}
 Referer: https://t.co/exemplo
 CF-IPCountry: BR
 
 ### Estatísticas do link criado acima, com os dias no fuso de Brasília
 GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=America/Sao_Paulo
+Authorization: Bearer {{login.response.body.$.token}}
 Accept: application/json
 
 ### Fuso horário inválido -> 400
 GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=Lua/Crateras
+Authorization: Bearer {{login.response.body.$.token}}
 
 ### Cria um link com código personalizado (4 a 10 letras/números)
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -65,6 +73,7 @@ Content-Type: application/json
 
 ### Mesmo código personalizado de novo -> 409
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -74,6 +83,7 @@ Content-Type: application/json
 
 ### Código personalizado inválido -> 400
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -83,6 +93,7 @@ Content-Type: application/json
 
 ### URL com acento: é salva normalizada ("promoção" vira "promo%C3%A7%C3%A3o")
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -91,6 +102,7 @@ Content-Type: application/json
 
 ### URL inválida -> 400
 POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {

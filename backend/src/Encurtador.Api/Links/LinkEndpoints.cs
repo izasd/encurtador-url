@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,14 +13,15 @@ public static class LinkEndpoints
 
     public static IEndpointRouteBuilder MapLinkEndpoints(this IEndpointRouteBuilder app)
     {
-        var links = app.MapGroup("/api/links").WithTags("Links");
+        // Criar e listar links exige login; o redirecionamento continua público.
+        var links = app.MapGroup("/api/links").WithTags("Links").RequireAuthorization();
 
         links.MapPost("/", CriarLink)
             .WithSummary("Cria um link curto, com código gerado ou personalizado")
             .ProducesProblem(StatusCodes.Status409Conflict);
 
         links.MapGet("/", ListarLinks)
-            .WithSummary("Lista os links cadastrados, do mais recente para o mais antigo");
+            .WithSummary("Lista os links do usuário, do mais recente para o mais antigo");
 
         app.MapGet("/{codigo:codigoCurto}", Redirecionar)
             .WithTags("Redirecionamento")
@@ -29,7 +32,7 @@ public static class LinkEndpoints
     }
 
     private static async Task<Results<Created<LinkResponse>, ValidationProblem, ProblemHttpResult>> CriarLink(
-        CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, CancellationToken ct)
+        CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, CancellationToken ct)
     {
         var erros = new Dictionary<string, string[]>();
 
@@ -50,11 +53,12 @@ public static class LinkEndpoints
             return TypedResults.ValidationProblem(erros);
         }
 
+        var userId = usuario.ObterIdDoUsuario();
         var criadoEm = DateTime.UtcNow;
 
         if (codigoPersonalizado is not null)
         {
-            var link = new Link { Codigo = codigoPersonalizado, UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+            var link = new Link { UserId = userId, Codigo = codigoPersonalizado, UrlOriginal = urlOriginal, CriadoEm = criadoEm };
 
             if (await TentarSalvarAsync(db, link, ct))
             {
@@ -70,7 +74,7 @@ public static class LinkEndpoints
         // já existir, outro é gerado no lugar.
         for (var tentativa = 1; tentativa <= MaximoDeTentativasDeCodigo; tentativa++)
         {
-            var link = new Link { Codigo = GeradorDeCodigo.Gerar(), UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+            var link = new Link { UserId = userId, Codigo = GeradorDeCodigo.Gerar(), UrlOriginal = urlOriginal, CriadoEm = criadoEm };
 
             if (await TentarSalvarAsync(db, link, ct))
             {
@@ -116,10 +120,13 @@ public static class LinkEndpoints
     }
 
     private static async Task<Ok<List<LinkResponse>>> ListarLinks(
-        AppDbContext db, HttpRequest http, CancellationToken ct)
+        AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, CancellationToken ct)
     {
+        var userId = usuario.ObterIdDoUsuario();
+
         var links = await db.Links
             .AsNoTracking()
+            .Where(l => l.UserId == userId)
             .OrderByDescending(l => l.Id)
             .ToListAsync(ct);
 

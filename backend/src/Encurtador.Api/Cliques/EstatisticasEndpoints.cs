@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
+using System.Security.Claims;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,20 +16,25 @@ public static class EstatisticasEndpoints
         app.MapGet("/api/links/{codigo:codigoCurto}/estatisticas", ObterEstatisticas)
             .WithTags("Estatísticas")
             .WithSummary("Cliques do link por dia, país, navegador, dispositivo e origem")
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         return app;
     }
 
     /// <param name="fusoHorario">Fuso IANA usado para separar os dias (ex.: America/Sao_Paulo).</param>
     private static async Task<Results<Ok<EstatisticasResponse>, ValidationProblem, ProblemHttpResult>> ObterEstatisticas(
-        string codigo, AppDbContext db, FusosHorarios fusos, CancellationToken ct, string fusoHorario = "UTC")
+        string codigo, AppDbContext db, FusosHorarios fusos, ClaimsPrincipal usuario, CancellationToken ct,
+        string fusoHorario = "UTC")
     {
+        var userId = usuario.ObterIdDoUsuario();
+
         var linkId = await db.Links
-            .Where(l => l.Codigo == codigo)
+            .Where(l => l.Codigo == codigo && l.UserId == userId)
             .Select(l => (int?)l.Id)
             .FirstOrDefaultAsync(ct);
 
+        // Link de outro usuário recebe o mesmo 404 de código inexistente, para não revelar que existe.
         if (linkId is null)
         {
             return TypedResults.Problem(

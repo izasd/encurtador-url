@@ -82,10 +82,15 @@ namespace Encurtador.Api.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Codigo")
                         .IsUnique();
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Links");
                 });
@@ -128,6 +133,15 @@ namespace Encurtador.Api.Migrations
                     b.HasOne("Encurtador.Api.Links.Link", null)
                         .WithMany()
                         .HasForeignKey("LinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Encurtador.Api.Links.Link", b =>
+                {
+                    b.HasOne("Encurtador.Api.Usuarios.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

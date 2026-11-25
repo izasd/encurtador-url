@@ -25,6 +25,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             link.Property(l => l.Codigo).HasMaxLength(Link.TamanhoMaximoCodigo);
             link.HasIndex(l => l.Codigo).IsUnique();
             link.Property(l => l.UrlOriginal).HasMaxLength(Link.TamanhoMaximoUrl);
+
+            // Apagar um usuário apaga também os links dele (e, em cascata, os cliques).
+            link.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Click>(click =>
