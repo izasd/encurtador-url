@@ -30,7 +30,7 @@ public static class LinkEndpoints
     private static async Task<Results<Created<LinkResponse>, ValidationProblem>> CriarLink(
         CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, CancellationToken ct)
     {
-        if (!ValidadorDeUrl.EhValida(requisicao.UrlOriginal))
+        if (!ValidadorDeUrl.TentarNormalizar(requisicao.UrlOriginal, out var urlOriginal))
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
@@ -41,7 +41,7 @@ public static class LinkEndpoints
         var link = new Link
         {
             Codigo = GeradorDeCodigo.Gerar(),
-            UrlOriginal = requisicao.UrlOriginal,
+            UrlOriginal = urlOriginal,
             CriadoEm = DateTime.UtcNow,
         };
 
