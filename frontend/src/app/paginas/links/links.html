@@ -162,12 +162,7 @@
 
           @if (qrAberto() === link.codigo) {
             <div class="painel" [id]="'qr-' + link.codigo">
-              <!-- O código do gerador de QR Code só é baixado quando o primeiro painel é aberto. -->
-              @defer (on immediate) {
-                <app-qr-code [texto]="link.urlCurta" [nomeArquivo]="'qrcode-' + link.codigo + '.png'" />
-              } @loading {
-                <p class="dica">Gerando o QR Code…</p>
-              }
+              <app-qr-code [codigo]="link.codigo" [urlCurta]="link.urlCurta" />
             </div>
           }
         </li>
