@@ -1,6 +1,28 @@
 @Encurtador.Api_HostAddress = http://localhost:5198
 
-GET {{Encurtador.Api_HostAddress}}/weatherforecast/
+### Cria um link curto
+# @name criarLink
+POST {{Encurtador.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://learn.microsoft.com/dotnet/"
+}
+
+### Lista os links (mais recentes primeiro)
+GET {{Encurtador.Api_HostAddress}}/api/links
 Accept: application/json
 
-###
+### Redireciona para a URL original (usa o código criado acima)
+GET {{Encurtador.Api_HostAddress}}/{{criarLink.response.body.$.codigo}}
+
+### URL inválida -> 400
+POST {{Encurtador.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "urlOriginal": "ftp://exemplo.com"
+}
+
+### Código inexistente -> 404
+GET {{Encurtador.Api_HostAddress}}/naoexiste
