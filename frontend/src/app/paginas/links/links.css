@@ -7,6 +7,45 @@
   margin-right: 0.25rem;
 }
 
+.titulo-cartao {
+  margin-bottom: 1rem;
+}
+
+/* Formulário: URL larga, código estreito e botão na mesma linha (empilham no celular). */
+.formulario-novo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem auto;
+  align-items: start;
+  gap: 0 1rem;
+}
+
+.formulario-novo .campo {
+  margin-bottom: 0;
+}
+
+.botao-encurtar {
+  margin-top: 1.8rem;
+}
+
+.criado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+}
+
+.criado a {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.alerta-erro,
+.alerta-aviso {
+  margin-top: 1rem;
+}
+
 .cabecalho-secao {
   display: flex;
   align-items: baseline;
@@ -38,13 +77,16 @@
 }
 
 .item {
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--borda);
+}
+
+.item-linha {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.25rem 1rem;
-  padding: 0.875rem 0;
-  border-top: 1px solid var(--borda);
+  gap: 0.5rem 1rem;
 }
 
 .item-textos {
@@ -69,4 +111,28 @@
 .criado-em {
   font-size: 0.8125rem;
   color: var(--texto-suave);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.painel-qr {
+  margin-top: 0.875rem;
+  padding: 1rem;
+  border-radius: var(--raio-pequeno);
+  background: var(--realce);
+}
+
+@media (max-width: 40rem) {
+  .formulario-novo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .botao-encurtar {
+    margin-top: 0;
+  }
 }

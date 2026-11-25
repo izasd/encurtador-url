@@ -6,6 +6,46 @@
   </aside>
 }
 
+<section class="cartao" aria-labelledby="titulo-novo">
+  <h2 id="titulo-novo" class="titulo-cartao">Encurtar um link</h2>
+
+  <form class="formulario-novo" [formGroup]="formulario" (ngSubmit)="criar()" novalidate>
+    <div class="campo campo-url">
+      <label for="url">URL original</label>
+      <input id="url" type="url" formControlName="urlOriginal" placeholder="https://exemplo.com/um-endereco-bem-longo"
+        [attr.aria-invalid]="mensagem('urlOriginal') !== null" aria-describedby="erro-url">
+      @if (mensagem('urlOriginal'); as texto) {
+        <span id="erro-url" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <div class="campo campo-codigo">
+      <label for="codigo">Código personalizado</label>
+      <input id="codigo" type="text" formControlName="codigo" placeholder="ex.: promo2026" autocomplete="off"
+        spellcheck="false" [attr.aria-invalid]="mensagem('codigo') !== null" aria-describedby="dica-codigo erro-codigo">
+      <span id="dica-codigo" class="dica">Opcional: de 4 a 10 letras ou números. Em branco, geramos um.</span>
+      @if (mensagem('codigo'); as texto) {
+        <span id="erro-codigo" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <button class="botao botao-encurtar" type="submit" [disabled]="enviando()">Encurtar</button>
+  </form>
+
+  @if (erroGeral(); as texto) {
+    <p class="alerta alerta-erro" role="alert">{{ texto }}</p>
+  }
+
+  @if (criado(); as link) {
+    <div class="alerta alerta-sucesso criado" role="status">
+      <span>Link criado: <a [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a></span>
+      <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)">
+        {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
+      </button>
+    </div>
+  }
+</section>
+
 <section class="cartao" aria-labelledby="titulo-links">
   <div class="cabecalho-secao">
     <h1 id="titulo-links">Meus links</h1>
@@ -13,6 +53,12 @@
       <span class="contagem">{{ itens().length }} {{ itens().length === 1 ? 'link' : 'links' }}</span>
     }
   </div>
+
+  @if (falhaAoCopiar()) {
+    <p class="alerta alerta-aviso" role="alert">
+      Não foi possível copiar automaticamente. Selecione o link e copie com Ctrl+C.
+    </p>
+  }
 
   @if (links.error()) {
     <div class="alerta alerta-erro" role="alert">
@@ -22,18 +68,44 @@
   } @else if (links.isLoading() && itens().length === 0) {
     <p class="estado">Carregando seus links…</p>
   } @else if (itens().length === 0) {
-    <p class="estado">Você ainda não encurtou nenhum link.</p>
+    <p class="estado">Você ainda não encurtou nenhum link. Comece pelo formulário acima.</p>
   } @else {
     <ul class="lista" [class.recarregando]="links.isLoading()">
       @for (link of itens(); track link.codigo) {
         <li class="item">
-          <div class="item-textos">
-            <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
-            <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
+          <div class="item-linha">
+            <div class="item-textos">
+              <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+              <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
+              <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
+            </div>
+
+            <div class="acoes">
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)"
+                [attr.aria-label]="'Copiar ' + link.urlCurta">
+                {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
+              </button>
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="alternarQr(link.codigo)"
+                [attr.aria-expanded]="qrAberto() === link.codigo" [attr.aria-controls]="'qr-' + link.codigo">
+                QR Code
+              </button>
+            </div>
           </div>
-          <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
+
+          @if (qrAberto() === link.codigo) {
+            <div class="painel-qr" [id]="'qr-' + link.codigo">
+              <!-- O código do gerador de QR Code só é baixado quando o primeiro painel é aberto. -->
+              @defer (on immediate) {
+                <app-qr-code [texto]="link.urlCurta" [nomeArquivo]="'qrcode-' + link.codigo + '.png'" />
+              } @loading {
+                <p class="dica">Gerando o QR Code…</p>
+              }
+            </div>
+          }
         </li>
       }
     </ul>
   }
+
+  <p class="visualmente-oculto" aria-live="polite">{{ copiado() ? 'Link copiado.' : '' }}</p>
 </section>
