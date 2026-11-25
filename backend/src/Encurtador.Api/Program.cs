@@ -34,6 +34,10 @@ builder.Services.AddSingleton<FusosHorarios>();
 // Hash de senha do ASP.NET Core Identity: PBKDF2 com HMAC-SHA512, salt aleatório e 100 mil iterações.
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
+// Login com JWT (configuração na seção "Jwt").
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddAutenticacaoJwt(builder.Configuration);
+
 var app = builder.Build();
 
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota
@@ -47,6 +51,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapAuthEndpoints();
 app.MapLinkEndpoints();

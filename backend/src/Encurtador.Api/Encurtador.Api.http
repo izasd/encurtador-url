@@ -10,6 +10,25 @@ Content-Type: application/json
   "senha": "senha-forte-123"
 }
 
+### Entra e recebe o token JWT
+# @name login
+POST {{Encurtador.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "senha-forte-123"
+}
+
+### Senha errada -> 401 (mesma resposta de e-mail sem conta)
+POST {{Encurtador.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "senha-errada"
+}
+
 ### Cria um link curto
 # @name criarLink
 POST {{Encurtador.Api_HostAddress}}/api/links
