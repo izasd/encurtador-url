@@ -61,6 +61,10 @@ Accept: application/json
 GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=Lua/Crateras
 Authorization: Bearer {{login.response.body.$.token}}
 
+### QR Code do link criado acima (PNG; ?tamanho= de 2 a 40 pixels por módulo)
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/qrcode?tamanho=8
+Authorization: Bearer {{login.response.body.$.token}}
+
 ### Desativa o link criado acima (o redirecionamento passa a responder 410)
 PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
 Authorization: Bearer {{login.response.body.$.token}}

@@ -31,6 +31,11 @@ public static class LinkEndpoints
             .WithSummary("Exclui um link e as estatísticas dele")
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        links.MapGet("/{codigo:codigoCurto}/qrcode", ObterQrCode)
+            .WithSummary("Imagem PNG do QR Code que abre o link curto")
+            .Produces(StatusCodes.Status200OK, contentType: "image/png")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         app.MapGet("/{codigo:codigoCurto}", Redirecionar)
             .WithTags("Redirecionamento")
             .WithSummary("Redireciona para a URL original")
@@ -204,6 +209,30 @@ public static class LinkEndpoints
             .ExecuteDeleteAsync(ct);
 
         return excluidos == 0 ? NaoEncontrado(codigo) : TypedResults.NoContent();
+    }
+
+    /// <param name="tamanho">Pixels por módulo (cada quadradinho do código), de 2 a 40.</param>
+    private static async Task<Results<FileContentHttpResult, ValidationProblem, ProblemHttpResult>> ObterQrCode(
+        string codigo, AppDbContext db, HttpRequest http, HttpResponse resposta, ClaimsPrincipal usuario,
+        CancellationToken ct, int tamanho = GeradorDeQrCode.TamanhoPadrao)
+    {
+        if (tamanho is < GeradorDeQrCode.TamanhoMinimo or > GeradorDeQrCode.TamanhoMaximo)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["tamanho"] = [$"Use um tamanho de {GeradorDeQrCode.TamanhoMinimo} a {GeradorDeQrCode.TamanhoMaximo} pixels por módulo."],
+            });
+        }
+
+        var userId = usuario.ObterIdDoUsuario();
+        if (!await db.Links.AnyAsync(l => l.Codigo == codigo && l.UserId == userId, ct))
+        {
+            return NaoEncontrado(codigo);
+        }
+
+        // O conteúdo do QR Code (a URL curta) nunca muda para um código, então o navegador pode guardá-lo.
+        resposta.Headers.CacheControl = "private, max-age=86400";
+        return TypedResults.File(GeradorDeQrCode.Gerar(UrlCurta.Montar(http, codigo), tamanho), "image/png");
     }
 
     private static ProblemHttpResult NaoEncontrado(string codigo) =>
