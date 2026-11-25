@@ -1,4 +1,5 @@
 using Encurtador.Api.Dados;
+using Microsoft.EntityFrameworkCore;
 
 namespace Encurtador.Api.Cliques;
 
@@ -43,16 +44,29 @@ public class GravadorDeCliques(
             return 0;
         }
 
-        // Um erro aqui não pode derrubar o serviço: o lote é registrado no log e descartado.
+        // Um erro aqui não pode derrubar o serviço: o que não for gravado é registrado no log e descartado.
         try
         {
-            await using var escopo = scopeFactory.CreateAsyncScope();
-            var db = escopo.ServiceProvider.GetRequiredService<AppDbContext>();
+            await SalvarAsync(cliques);
+        }
+        catch (DbUpdateException ex) when (cliques.Count > 1)
+        {
+            // Um único clique inválido derruba o lote inteiro: por exemplo, o clique de um link
+            // apagado entre o redirecionamento e a gravação viola a chave estrangeira. Gravando um
+            // por um, só esse clique é perdido.
+            logger.LogWarning(ex, "Falha ao gravar um lote de {Quantidade} cliques; gravando um por um.", cliques.Count);
 
-            db.Clicks.AddRange(cliques.Select(c => c.ParaClick()));
-
-            // Sem CancellationToken de propósito: um lote já retirado da fila deve terminar de ser gravado.
-            await db.SaveChangesAsync();
+            foreach (var clique in cliques)
+            {
+                try
+                {
+                    await SalvarAsync([clique]);
+                }
+                catch (Exception exClique)
+                {
+                    logger.LogWarning(exClique, "Clique do link {LinkId} descartado.", clique.LinkId);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -60,5 +74,16 @@ public class GravadorDeCliques(
         }
 
         return cliques.Count;
+    }
+
+    private async Task SalvarAsync(IEnumerable<CliqueRegistrado> cliques)
+    {
+        await using var escopo = scopeFactory.CreateAsyncScope();
+        var db = escopo.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        db.Clicks.AddRange(cliques.Select(c => c.ParaClick()));
+
+        // Sem CancellationToken de propósito: cliques já retirados da fila devem terminar de ser gravados.
+        await db.SaveChangesAsync();
     }
 }
