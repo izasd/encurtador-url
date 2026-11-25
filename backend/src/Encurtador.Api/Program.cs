@@ -56,6 +56,9 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
 
+// Nos contêineres, o banco é atualizado aqui, antes de a API começar a atender.
+await app.AplicarMigracoesSeConfiguradoAsync();
+
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota
 // inexistente) ganham um corpo ProblemDetails.
 app.UseExceptionHandler();
@@ -82,4 +85,4 @@ app.MapEstatisticasEndpoints();
 // um caminho de 4 a 10 letras e números é um código de link curto.
 app.MapHealthChecks("/api/saude");
 
-app.Run();
+await app.RunAsync();
