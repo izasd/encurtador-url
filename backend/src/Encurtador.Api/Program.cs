@@ -78,6 +78,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Arquivos do site Angular, quando ele é publicado junto com a API (ver Hospedagem/SiteAngular.cs).
+app.UseSiteAngular();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -91,5 +94,7 @@ app.MapEstatisticasEndpoints();
 // Responde 200 ("Healthy") ou 503 ("Unhealthy"). Fica sob /api/ porque, na raiz,
 // um caminho de 4 a 10 letras e números é um código de link curto.
 app.MapHealthChecks("/api/saude");
+
+app.MapSiteAngular();
 
 await app.RunAsync();
