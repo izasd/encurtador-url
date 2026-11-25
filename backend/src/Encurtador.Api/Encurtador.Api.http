@@ -13,8 +13,17 @@ Content-Type: application/json
 GET {{Encurtador.Api_HostAddress}}/api/links
 Accept: application/json
 
-### Redireciona para a URL original (usa o código criado acima)
+### Redireciona para a URL original (usa o código criado acima) e registra o clique
 GET {{Encurtador.Api_HostAddress}}/{{criarLink.response.body.$.codigo}}
+Referer: https://t.co/exemplo
+CF-IPCountry: BR
+
+### Estatísticas do link criado acima, com os dias no fuso de Brasília
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=America/Sao_Paulo
+Accept: application/json
+
+### Fuso horário inválido -> 400
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=Lua/Crateras
 
 ### Cria um link com código personalizado (4 a 10 letras/números)
 POST {{Encurtador.Api_HostAddress}}/api/links

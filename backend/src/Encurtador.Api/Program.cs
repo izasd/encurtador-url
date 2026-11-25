@@ -27,6 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseNpgsql(connectio
 // O redirecionamento só enfileira o clique; o GravadorDeCliques grava no banco em segundo plano.
 builder.Services.AddSingleton<FilaDeCliques>();
 builder.Services.AddHostedService<GravadorDeCliques>();
+builder.Services.AddSingleton<FusosHorarios>();
 
 var app = builder.Build();
 
@@ -43,5 +44,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapLinkEndpoints();
+app.MapEstatisticasEndpoints();
 
 app.Run();
