@@ -21,17 +21,21 @@ public static class LinkEndpoints
         // duplicadas porque { } delimitam parâmetros no template da rota.
         app.MapGet("/{codigo:regex(^[a-zA-Z0-9]{{4,10}}$)}", Redirecionar)
             .WithTags("Redirecionamento")
-            .WithSummary("Redireciona para a URL original");
+            .WithSummary("Redireciona para a URL original")
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
 
-    private static async Task<Results<Created<LinkResponse>, BadRequest<RespostaErro>>> CriarLink(
+    private static async Task<Results<Created<LinkResponse>, ValidationProblem>> CriarLink(
         CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, CancellationToken ct)
     {
         if (!ValidadorDeUrl.EhValida(requisicao.UrlOriginal))
         {
-            return TypedResults.BadRequest(new RespostaErro("URL inválida. Forneça http:// ou https://"));
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["urlOriginal"] = [$"Informe uma URL válida, começando com http:// ou https:// e com até {Link.TamanhoMaximoUrl} caracteres."],
+            });
         }
 
         var link = new Link
@@ -59,7 +63,7 @@ public static class LinkEndpoints
         return TypedResults.Ok(links.Select(l => ParaResposta(l, http)).ToList());
     }
 
-    private static async Task<Results<RedirectHttpResult, NotFound<RespostaErro>>> Redirecionar(
+    private static async Task<Results<RedirectHttpResult, ProblemHttpResult>> Redirecionar(
         string codigo, AppDbContext db, CancellationToken ct)
     {
         var urlOriginal = await db.Links
@@ -69,7 +73,9 @@ public static class LinkEndpoints
 
         if (urlOriginal is null)
         {
-            return TypedResults.NotFound(new RespostaErro("Código não encontrado"));
+            return TypedResults.Problem(
+                detail: $"Nenhum link encontrado com o código '{codigo}'.",
+                statusCode: StatusCodes.Status404NotFound);
         }
 
         return TypedResults.Redirect(urlOriginal);
