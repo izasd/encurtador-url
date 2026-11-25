@@ -1,0 +1,72 @@
+:host {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.aviso-visitante strong {
+  margin-right: 0.25rem;
+}
+
+.cabecalho-secao {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.contagem {
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+.estado {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Ao recarregar, a lista anterior continua visível, só mais apagada. */
+.lista.recarregando {
+  opacity: 0.6;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--borda);
+}
+
+.item-textos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 18rem;
+}
+
+.url-curta {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.url-original {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: var(--texto-secundario);
+}
+
+.criado-em {
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+}

@@ -1,0 +1,39 @@
+@if (sessao.usuario()?.ehVisitante) {
+  <aside class="alerta alerta-aviso aviso-visitante">
+    <strong>Você está numa conta de visitante.</strong>
+    Os links de exemplo e os que você criar serão apagados em 24 horas.
+    <button type="button" class="link-botao" (click)="criarConta()">Criar uma conta</button>
+  </aside>
+}
+
+<section class="cartao" aria-labelledby="titulo-links">
+  <div class="cabecalho-secao">
+    <h1 id="titulo-links">Meus links</h1>
+    @if (links.hasValue() && itens().length > 0) {
+      <span class="contagem">{{ itens().length }} {{ itens().length === 1 ? 'link' : 'links' }}</span>
+    }
+  </div>
+
+  @if (links.error()) {
+    <div class="alerta alerta-erro" role="alert">
+      Não foi possível carregar seus links.
+      <button type="button" class="link-botao" (click)="links.reload()">Tentar de novo</button>
+    </div>
+  } @else if (links.isLoading() && itens().length === 0) {
+    <p class="estado">Carregando seus links…</p>
+  } @else if (itens().length === 0) {
+    <p class="estado">Você ainda não encurtou nenhum link.</p>
+  } @else {
+    <ul class="lista" [class.recarregando]="links.isLoading()">
+      @for (link of itens(); track link.codigo) {
+        <li class="item">
+          <div class="item-textos">
+            <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+            <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
+          </div>
+          <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
+        </li>
+      }
+    </ul>
+  }
+</section>
