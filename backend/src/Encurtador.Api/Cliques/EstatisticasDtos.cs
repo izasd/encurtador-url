@@ -2,6 +2,8 @@ namespace Encurtador.Api.Cliques;
 
 public record EstatisticasResponse(
     string Codigo,
+    string UrlOriginal,
+    string UrlCurta,
     string FusoHorario,
     int TotalDeCliques,
     IReadOnlyList<CliquesPorDia> PorDia,

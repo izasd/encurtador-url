@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Links;
 using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -24,18 +25,18 @@ public static class EstatisticasEndpoints
 
     /// <param name="fusoHorario">Fuso IANA usado para separar os dias (ex.: America/Sao_Paulo).</param>
     private static async Task<Results<Ok<EstatisticasResponse>, ValidationProblem, ProblemHttpResult>> ObterEstatisticas(
-        string codigo, AppDbContext db, FusosHorarios fusos, ClaimsPrincipal usuario, CancellationToken ct,
-        string fusoHorario = "UTC")
+        string codigo, AppDbContext db, FusosHorarios fusos, ClaimsPrincipal usuario, HttpRequest http,
+        CancellationToken ct, string fusoHorario = "UTC")
     {
         var userId = usuario.ObterIdDoUsuario();
 
-        var linkId = await db.Links
+        var link = await db.Links
             .Where(l => l.Codigo == codigo && l.UserId == userId)
-            .Select(l => (int?)l.Id)
+            .Select(l => new { l.Id, l.UrlOriginal })
             .FirstOrDefaultAsync(ct);
 
         // Link de outro usuário recebe o mesmo 404 de código inexistente, para não revelar que existe.
-        if (linkId is null)
+        if (link is null)
         {
             return TypedResults.Problem(
                 detail: $"Nenhum link encontrado com o código '{codigo}'.",
@@ -50,7 +51,7 @@ public static class EstatisticasEndpoints
             });
         }
 
-        var cliques = db.Clicks.Where(c => c.LinkId == linkId);
+        var cliques = db.Clicks.Where(c => c.LinkId == link.Id);
 
         // O PostgreSQL converte cada horário para o fuso pedido (AT TIME ZONE) antes de separar
         // os dias: um clique às 22h em Brasília conta naquele dia, e não no seguinte (como em UTC).
@@ -64,6 +65,8 @@ public static class EstatisticasEndpoints
 
         return TypedResults.Ok(new EstatisticasResponse(
             codigo,
+            link.UrlOriginal,
+            UrlCurta.Montar(http, codigo),
             fusoHorario,
             TotalDeCliques: porDia.Sum(d => d.Cliques),
             porDia,

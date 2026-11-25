@@ -161,5 +161,5 @@ public static class LinkEndpoints
     }
 
     private static LinkResponse ParaResposta(Link link, HttpRequest http) =>
-        new(link.Codigo, link.UrlOriginal, $"{http.Scheme}://{http.Host}{http.PathBase}/{link.Codigo}", link.CriadoEm);
+        new(link.Codigo, link.UrlOriginal, UrlCurta.Montar(http, link.Codigo), link.CriadoEm);
 }
