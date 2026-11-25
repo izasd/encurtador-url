@@ -15,6 +15,10 @@ builder.Services.AddProblemDetails();
 // Assim a resposta é 400 em qualquer ambiente, como já acontece em produção.
 builder.Services.Configure<RouteHandlerOptions>(opcoes => opcoes.ThrowOnBadRequest = false);
 
+// Permite usar {codigo:codigoCurto} nas rotas (ver LinkEndpoints).
+builder.Services.Configure<RouteOptions>(opcoes =>
+    opcoes.ConstraintMap[CodigoCurtoConstraint.Nome] = typeof(CodigoCurtoConstraint));
+
 var connectionString = builder.Configuration.GetConnectionString("Encurtador")
     ?? throw new InvalidOperationException("A connection string 'Encurtador' não foi configurada.");
 builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseNpgsql(connectionString));

@@ -13,15 +13,13 @@ public static class LinkEndpoints
         var links = app.MapGroup("/api/links").WithTags("Links");
 
         links.MapPost("/", CriarLink)
-            .WithSummary("Cria um link curto");
+            .WithSummary("Cria um link curto, com código gerado ou personalizado")
+            .ProducesProblem(StatusCodes.Status409Conflict);
 
         links.MapGet("/", ListarLinks)
             .WithSummary("Lista os links cadastrados, do mais recente para o mais antigo");
 
-        // Só aceita códigos de 4 a 10 letras/números (como na v1), para a rota
-        // não capturar caminhos como /favicon.ico. As chaves da regex são
-        // duplicadas porque { } delimitam parâmetros no template da rota.
-        app.MapGet("/{codigo:regex(^[a-zA-Z0-9]{{4,10}}$)}", Redirecionar)
+        app.MapGet("/{codigo:codigoCurto}", Redirecionar)
             .WithTags("Redirecionamento")
             .WithSummary("Redireciona para a URL original")
             .ProducesProblem(StatusCodes.Status404NotFound);
@@ -29,18 +27,43 @@ public static class LinkEndpoints
         return app;
     }
 
-    private static async Task<Results<Created<LinkResponse>, ValidationProblem>> CriarLink(
+    private static async Task<Results<Created<LinkResponse>, ValidationProblem, ProblemHttpResult>> CriarLink(
         CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, CancellationToken ct)
     {
+        var erros = new Dictionary<string, string[]>();
+
         if (!ValidadorDeUrl.TentarNormalizar(requisicao.UrlOriginal, out var urlOriginal))
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
-            {
-                ["urlOriginal"] = [$"Informe uma URL válida, começando com http:// ou https:// e com até {Link.TamanhoMaximoUrl} caracteres."],
-            });
+            erros["urlOriginal"] = [$"Informe uma URL válida, começando com http:// ou https:// e com até {Link.TamanhoMaximoUrl} caracteres."];
+        }
+
+        // Código em branco conta como "não informado": nesse caso a API gera um.
+        var codigoPersonalizado = string.IsNullOrWhiteSpace(requisicao.Codigo) ? null : requisicao.Codigo.Trim();
+        if (codigoPersonalizado is not null && !ValidadorDeCodigo.EhValido(codigoPersonalizado))
+        {
+            erros["codigo"] = [$"O código deve ter de {Link.TamanhoMinimoCodigo} a {Link.TamanhoMaximoCodigo} caracteres, apenas letras e números."];
+        }
+
+        if (erros.Count > 0)
+        {
+            return TypedResults.ValidationProblem(erros);
         }
 
         var criadoEm = DateTime.UtcNow;
+
+        if (codigoPersonalizado is not null)
+        {
+            var link = new Link { Codigo = codigoPersonalizado, UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+
+            if (await TentarSalvarAsync(db, link, ct))
+            {
+                return Criado(link, http);
+            }
+
+            return TypedResults.Problem(
+                detail: $"O código '{codigoPersonalizado}' já está em uso.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         // Com 62^6 combinações uma colisão é raríssima, mas se o código gerado
         // já existir, outro é gerado no lugar.

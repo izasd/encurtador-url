@@ -2,6 +2,7 @@ namespace Encurtador.Api.Links;
 
 public class Link
 {
+    public const int TamanhoMinimoCodigo = 4;
     public const int TamanhoMaximoCodigo = 10;
     public const int TamanhoMaximoUrl = 2048;
 

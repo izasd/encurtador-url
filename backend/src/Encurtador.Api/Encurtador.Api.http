@@ -16,6 +16,33 @@ Accept: application/json
 ### Redireciona para a URL original (usa o código criado acima)
 GET {{Encurtador.Api_HostAddress}}/{{criarLink.response.body.$.codigo}}
 
+### Cria um link com código personalizado (4 a 10 letras/números)
+POST {{Encurtador.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "github"
+}
+
+### Mesmo código personalizado de novo -> 409
+POST {{Encurtador.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "github"
+}
+
+### Código personalizado inválido -> 400
+POST {{Encurtador.Api_HostAddress}}/api/links
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "ab"
+}
+
 ### URL com acento: é salva normalizada ("promoção" vira "promo%C3%A7%C3%A3o")
 POST {{Encurtador.Api_HostAddress}}/api/links
 Content-Type: application/json

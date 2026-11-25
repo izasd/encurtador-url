@@ -30,4 +30,14 @@ public class GeradorDeCodigoTests
             Assert.Matches("^[A-Za-z0-9]+$", GeradorDeCodigo.Gerar());
         }
     }
+
+    [Fact]
+    public void Gerar_ProduzCodigoAceitoPeloValidadorDeCodigo()
+    {
+        // Garante que todo código gerado também é aceito pela rota de redirecionamento.
+        for (var i = 0; i < 1_000; i++)
+        {
+            Assert.True(ValidadorDeCodigo.EhValido(GeradorDeCodigo.Gerar()));
+        }
+    }
 }
