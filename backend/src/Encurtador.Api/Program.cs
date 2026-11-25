@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Limites;
 using Encurtador.Api.Links;
 using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Identity;
@@ -47,6 +48,9 @@ builder.Services.AddAutenticacaoJwt(builder.Configuration);
 // Contas de visitante ("entrar como visitante") são apagadas depois de 24 horas.
 builder.Services.AddHostedService<LimpezaDeVisitantes>();
 
+// Limites de requisições por janela de tempo (ver Limites/LimitesDeRequisicao.cs).
+builder.Services.AddLimitesDeRequisicao();
+
 var app = builder.Build();
 
 // Exceções não tratadas viram 500 e respostas de erro sem corpo (ex.: rota
@@ -63,6 +67,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Depois da autenticação, para limitar a criação de links por usuário.
+app.UseRateLimiter();
 
 app.MapAuthEndpoints();
 app.MapLinkEndpoints();

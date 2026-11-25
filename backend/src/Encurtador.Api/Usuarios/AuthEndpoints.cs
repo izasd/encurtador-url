@@ -1,4 +1,5 @@
 using Encurtador.Api.Dados;
+using Encurtador.Api.Limites;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,14 +20,20 @@ public static class AuthEndpoints
 
         auth.MapPost("/registrar", Registrar)
             .WithSummary("Cria uma conta")
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimitesDeRequisicao.Autenticacao);
 
         auth.MapPost("/login", Login)
             .WithSummary("Confere e-mail e senha e devolve um token JWT")
-            .ProducesProblem(StatusCodes.Status401Unauthorized);
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimitesDeRequisicao.Autenticacao);
 
         auth.MapPost("/visitante", EntrarComoVisitante)
-            .WithSummary("Cria uma conta temporária de visitante, com dados de exemplo, e devolve um token JWT");
+            .WithSummary("Cria uma conta temporária de visitante, com dados de exemplo, e devolve um token JWT")
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimitesDeRequisicao.Visitante);
 
         return app;
     }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
+using Encurtador.Api.Limites;
 using Encurtador.Api.Usuarios;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,9 @@ public static class LinkEndpoints
 
         links.MapPost("/", CriarLink)
             .WithSummary("Cria um link curto, com código gerado ou personalizado e expiração opcional")
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimitesDeRequisicao.CriacaoDeLinks);
 
         links.MapGet("/", ListarLinks)
             .WithSummary("Lista os links do usuário, do mais recente para o mais antigo");
