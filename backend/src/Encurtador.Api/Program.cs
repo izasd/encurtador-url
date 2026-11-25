@@ -29,8 +29,9 @@ builder.Services.ConfigureHttpJsonOptions(opcoes =>
 builder.Services.Configure<RouteOptions>(opcoes =>
     opcoes.ConstraintMap[CodigoCurtoConstraint.Nome] = typeof(CodigoCurtoConstraint));
 
-var connectionString = builder.Configuration.GetConnectionString("Encurtador")
-    ?? throw new InvalidOperationException("A connection string 'Encurtador' não foi configurada.");
+// Aceita também o formato de URL (postgresql://...) dos serviços de PostgreSQL gerenciado.
+var connectionString = ConexaoDoBanco.Normalizar(builder.Configuration.GetConnectionString("Encurtador")
+    ?? throw new InvalidOperationException("A connection string 'Encurtador' não foi configurada."));
 builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseNpgsql(connectionString));
 
 // O redirecionamento só enfileira o clique; o GravadorDeCliques grava no banco em segundo plano.
