@@ -1,3 +1,4 @@
+using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
 using Encurtador.Api.Links;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,10 @@ builder.Services.Configure<RouteOptions>(opcoes =>
 var connectionString = builder.Configuration.GetConnectionString("Encurtador")
     ?? throw new InvalidOperationException("A connection string 'Encurtador' não foi configurada.");
 builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseNpgsql(connectionString));
+
+// O redirecionamento só enfileira o clique; o GravadorDeCliques grava no banco em segundo plano.
+builder.Services.AddSingleton<FilaDeCliques>();
+builder.Services.AddHostedService<GravadorDeCliques>();
 
 var app = builder.Build();
 

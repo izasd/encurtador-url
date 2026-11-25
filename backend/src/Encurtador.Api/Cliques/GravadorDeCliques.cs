@@ -1,0 +1,64 @@
+using Encurtador.Api.Dados;
+
+namespace Encurtador.Api.Cliques;
+
+/// <summary>
+/// Lê a <see cref="FilaDeCliques"/> em segundo plano e grava os cliques no banco em lotes.
+/// </summary>
+public class GravadorDeCliques(
+    FilaDeCliques fila, IServiceScopeFactory scopeFactory, ILogger<GravadorDeCliques> logger) : BackgroundService
+{
+    private const int TamanhoMaximoDoLote = 500;
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            while (await fila.Leitor.WaitToReadAsync(stoppingToken))
+            {
+                await GravarLoteAsync();
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // A aplicação está encerrando.
+        }
+
+        // Antes de encerrar, grava o que ainda estiver na fila.
+        while (await GravarLoteAsync() > 0)
+        {
+        }
+    }
+
+    private async Task<int> GravarLoteAsync()
+    {
+        var cliques = new List<CliqueRegistrado>();
+        while (cliques.Count < TamanhoMaximoDoLote && fila.Leitor.TryRead(out var clique))
+        {
+            cliques.Add(clique);
+        }
+
+        if (cliques.Count == 0)
+        {
+            return 0;
+        }
+
+        // Um erro aqui não pode derrubar o serviço: o lote é registrado no log e descartado.
+        try
+        {
+            await using var escopo = scopeFactory.CreateAsyncScope();
+            var db = escopo.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            db.Clicks.AddRange(cliques.Select(c => c.ParaClick()));
+
+            // Sem CancellationToken de propósito: um lote já retirado da fila deve terminar de ser gravado.
+            await db.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Não foi possível gravar {Quantidade} cliques; eles foram descartados.", cliques.Count);
+        }
+
+        return cliques.Count;
+    }
+}

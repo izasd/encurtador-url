@@ -1,3 +1,4 @@
+using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -126,21 +127,30 @@ public static class LinkEndpoints
     }
 
     private static async Task<Results<RedirectHttpResult, ProblemHttpResult>> Redirecionar(
-        string codigo, AppDbContext db, CancellationToken ct)
+        string codigo, AppDbContext db, FilaDeCliques fila, HttpRequest http, CancellationToken ct)
     {
-        var urlOriginal = await db.Links
+        var link = await db.Links
             .Where(l => l.Codigo == codigo)
-            .Select(l => l.UrlOriginal)
+            .Select(l => new { l.Id, l.UrlOriginal })
             .FirstOrDefaultAsync(ct);
 
-        if (urlOriginal is null)
+        if (link is null)
         {
             return TypedResults.Problem(
                 detail: $"Nenhum link encontrado com o código '{codigo}'.",
                 statusCode: StatusCodes.Status404NotFound);
         }
 
-        return TypedResults.Redirect(urlOriginal);
+        // Só captura os dados brutos: a análise e a gravação do clique acontecem em
+        // segundo plano, para o redirecionamento não esperar o banco.
+        fila.TentarEnfileirar(new CliqueRegistrado(
+            link.Id,
+            DateTime.UtcNow,
+            http.Headers.UserAgent.ToString(),
+            http.Headers.Referer.ToString(),
+            http.Headers["CF-IPCountry"].ToString()));
+
+        return TypedResults.Redirect(link.UrlOriginal);
     }
 
     private static LinkResponse ParaResposta(Link link, HttpRequest http) =>
