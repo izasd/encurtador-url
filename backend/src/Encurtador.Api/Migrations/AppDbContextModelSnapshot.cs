@@ -22,6 +22,45 @@ namespace Encurtador.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Encurtador.Api.Cliques.Click", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Dispositivo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("LinkId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Navegador")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Pais")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<string>("Referer")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LinkId", "CriadoEm");
+
+                    b.ToTable("Clicks");
+                });
+
             modelBuilder.Entity("Encurtador.Api.Links.Link", b =>
                 {
                     b.Property<int>("Id")
@@ -49,6 +88,15 @@ namespace Encurtador.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Links");
+                });
+
+            modelBuilder.Entity("Encurtador.Api.Cliques.Click", b =>
+                {
+                    b.HasOne("Encurtador.Api.Links.Link", null)
+                        .WithMany()
+                        .HasForeignKey("LinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
