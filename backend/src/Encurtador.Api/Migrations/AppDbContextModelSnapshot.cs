@@ -69,12 +69,18 @@ namespace Encurtador.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
                     b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpiraEm")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UrlOriginal")

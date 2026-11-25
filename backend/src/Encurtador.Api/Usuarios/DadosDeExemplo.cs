@@ -16,12 +16,13 @@ public static class DadosDeExemplo
     /// <summary>Tempo de vida de uma conta de visitante; maior que a validade do token (8 horas).</summary>
     public static readonly TimeSpan Validade = TimeSpan.FromHours(24);
 
-    private static readonly (string Url, int DiasAtras, int Cliques)[] Links =
+    // Um link expira daqui a 10 dias e outro está desativado, para o visitante ver os dois casos.
+    private static readonly (string Url, int DiasAtras, int Cliques, int? ExpiraEmDias, bool Ativo)[] Links =
     [
-        ("https://github.com/", 28, 140),
-        ("https://learn.microsoft.com/dotnet/", 21, 95),
-        ("https://angular.dev/", 12, 70),
-        ("https://www.postgresql.org/docs/", 5, 35),
+        ("https://github.com/", 28, 140, null, true),
+        ("https://learn.microsoft.com/dotnet/", 21, 95, null, true),
+        ("https://angular.dev/", 12, 70, 10, true),
+        ("https://www.postgresql.org/docs/", 5, 35, null, false),
     ];
 
     private static readonly (string Valor, int Peso)[] Navegadores =
@@ -64,6 +65,8 @@ public static class DadosDeExemplo
                 Codigo = GeradorDeCodigo.Gerar(),
                 UrlOriginal = l.Url,
                 CriadoEm = agora.AddDays(-l.DiasAtras),
+                ExpiraEm = l.ExpiraEmDias is int dias ? agora.AddDays(dias) : null,
+                Ativo = l.Ativo,
             })
             .ToList();
 

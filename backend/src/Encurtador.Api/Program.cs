@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Encurtador.Api.Cliques;
 using Encurtador.Api.Dados;
 using Encurtador.Api.Links;
@@ -17,6 +19,10 @@ builder.Services.AddProblemDetails();
 // (JSON malformado, corpo vazio), o que o UseExceptionHandler transformaria em 500.
 // Assim a resposta é 400 em qualquer ambiente, como já acontece em produção.
 builder.Services.Configure<RouteHandlerOptions>(opcoes => opcoes.ThrowOnBadRequest = false);
+
+// Enums saem como texto no JSON ("situacao": "expirado"), não como números.
+builder.Services.ConfigureHttpJsonOptions(opcoes =>
+    opcoes.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 
 // Permite usar {codigo:codigoCurto} nas rotas (ver LinkEndpoints).
 builder.Services.Configure<RouteOptions>(opcoes =>

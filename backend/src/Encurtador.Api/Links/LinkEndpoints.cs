@@ -17,7 +17,7 @@ public static class LinkEndpoints
         var links = app.MapGroup("/api/links").WithTags("Links").RequireAuthorization();
 
         links.MapPost("/", CriarLink)
-            .WithSummary("Cria um link curto, com código gerado ou personalizado")
+            .WithSummary("Cria um link curto, com código gerado ou personalizado e expiração opcional")
             .ProducesProblem(StatusCodes.Status409Conflict);
 
         links.MapGet("/", ListarLinks)
@@ -26,14 +26,17 @@ public static class LinkEndpoints
         app.MapGet("/{codigo:codigoCurto}", Redirecionar)
             .WithTags("Redirecionamento")
             .WithSummary("Redireciona para a URL original")
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status410Gone);
 
         return app;
     }
 
     private static async Task<Results<Created<LinkResponse>, ValidationProblem, ProblemHttpResult>> CriarLink(
-        CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, CancellationToken ct)
+        CriarLinkRequest requisicao, AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, TimeProvider relogio,
+        CancellationToken ct)
     {
+        var agora = relogio.GetUtcNow().UtcDateTime;
         var erros = new Dictionary<string, string[]>();
 
         if (!ValidadorDeUrl.TentarNormalizar(requisicao.UrlOriginal, out var urlOriginal))
@@ -48,21 +51,35 @@ public static class LinkEndpoints
             erros["codigo"] = [$"O código deve ter de {Link.TamanhoMinimoCodigo} a {Link.TamanhoMaximoCodigo} caracteres, apenas letras e números."];
         }
 
+        DateTime? expiraEm = null;
+        if (requisicao.ExpiraEm is not null)
+        {
+            if (ValidadorDeExpiracao.TentarLer(requisicao.ExpiraEm, agora, out var data))
+            {
+                expiraEm = data;
+            }
+            else
+            {
+                erros["expiraEm"] = [ValidadorDeExpiracao.Mensagem];
+            }
+        }
+
         if (erros.Count > 0)
         {
             return TypedResults.ValidationProblem(erros);
         }
 
         var userId = usuario.ObterIdDoUsuario();
-        var criadoEm = DateTime.UtcNow;
+        Link NovoLink(string codigo) =>
+            new() { UserId = userId, Codigo = codigo, UrlOriginal = urlOriginal, CriadoEm = agora, ExpiraEm = expiraEm };
 
         if (codigoPersonalizado is not null)
         {
-            var link = new Link { UserId = userId, Codigo = codigoPersonalizado, UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+            var link = NovoLink(codigoPersonalizado);
 
             if (await TentarSalvarAsync(db, link, ct))
             {
-                return Criado(link, http);
+                return Criado(link, http, agora);
             }
 
             return TypedResults.Problem(
@@ -74,11 +91,11 @@ public static class LinkEndpoints
         // já existir, outro é gerado no lugar.
         for (var tentativa = 1; tentativa <= MaximoDeTentativasDeCodigo; tentativa++)
         {
-            var link = new Link { UserId = userId, Codigo = GeradorDeCodigo.Gerar(), UrlOriginal = urlOriginal, CriadoEm = criadoEm };
+            var link = NovoLink(GeradorDeCodigo.Gerar());
 
             if (await TentarSalvarAsync(db, link, ct))
             {
-                return Criado(link, http);
+                return Criado(link, http, agora);
             }
         }
 
@@ -113,16 +130,17 @@ public static class LinkEndpoints
         }
     }
 
-    private static Created<LinkResponse> Criado(Link link, HttpRequest http)
+    private static Created<LinkResponse> Criado(Link link, HttpRequest http, DateTime agora)
     {
-        var resposta = ParaResposta(link, http);
+        var resposta = ParaResposta(link, http, agora);
         return TypedResults.Created(resposta.UrlCurta, resposta);
     }
 
     private static async Task<Ok<List<LinkResponse>>> ListarLinks(
-        AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, CancellationToken ct)
+        AppDbContext db, HttpRequest http, ClaimsPrincipal usuario, TimeProvider relogio, CancellationToken ct)
     {
         var userId = usuario.ObterIdDoUsuario();
+        var agora = relogio.GetUtcNow().UtcDateTime;
 
         var links = await db.Links
             .AsNoTracking()
@@ -130,15 +148,16 @@ public static class LinkEndpoints
             .OrderByDescending(l => l.Id)
             .ToListAsync(ct);
 
-        return TypedResults.Ok(links.Select(l => ParaResposta(l, http)).ToList());
+        return TypedResults.Ok(links.Select(l => ParaResposta(l, http, agora)).ToList());
     }
 
     private static async Task<Results<RedirectHttpResult, ProblemHttpResult>> Redirecionar(
-        string codigo, AppDbContext db, FilaDeCliques fila, HttpRequest http, CancellationToken ct)
+        string codigo, AppDbContext db, FilaDeCliques fila, HttpRequest http, TimeProvider relogio, CancellationToken ct)
     {
+        var agora = relogio.GetUtcNow().UtcDateTime;
         var link = await db.Links
             .Where(l => l.Codigo == codigo)
-            .Select(l => new { l.Id, l.UrlOriginal })
+            .Select(l => new { l.Id, l.UrlOriginal, l.Ativo, l.ExpiraEm })
             .FirstOrDefaultAsync(ct);
 
         if (link is null)
@@ -148,11 +167,21 @@ public static class LinkEndpoints
                 statusCode: StatusCodes.Status404NotFound);
         }
 
+        // Desativado ou expirado: 410 (o link existe, mas foi tirado do ar de propósito).
+        // O clique não é registrado.
+        switch (Link.Situacao(link.Ativo, link.ExpiraEm, agora))
+        {
+            case SituacaoDoLink.Desativado:
+                return TypedResults.Problem(detail: "Este link foi desativado pelo dono.", statusCode: StatusCodes.Status410Gone);
+            case SituacaoDoLink.Expirado:
+                return TypedResults.Problem(detail: "Este link expirou.", statusCode: StatusCodes.Status410Gone);
+        }
+
         // Só captura os dados brutos: a análise e a gravação do clique acontecem em
         // segundo plano, para o redirecionamento não esperar o banco.
         fila.TentarEnfileirar(new CliqueRegistrado(
             link.Id,
-            DateTime.UtcNow,
+            agora,
             http.Headers.UserAgent.ToString(),
             http.Headers.Referer.ToString(),
             http.Headers["CF-IPCountry"].ToString()));
@@ -160,6 +189,13 @@ public static class LinkEndpoints
         return TypedResults.Redirect(link.UrlOriginal);
     }
 
-    private static LinkResponse ParaResposta(Link link, HttpRequest http) =>
-        new(link.Codigo, link.UrlOriginal, UrlCurta.Montar(http, link.Codigo), link.CriadoEm);
+    private static LinkResponse ParaResposta(Link link, HttpRequest http, DateTime agora) =>
+        new(
+            link.Codigo,
+            link.UrlOriginal,
+            UrlCurta.Montar(http, link.Codigo),
+            link.CriadoEm,
+            link.Ativo,
+            link.ExpiraEm,
+            Link.Situacao(link.Ativo, link.ExpiraEm, agora));
 }
