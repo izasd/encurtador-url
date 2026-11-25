@@ -1,0 +1,11 @@
+# Só o que o Dockerfile usa entra no contexto do build.
+*
+!backend/src/
+!frontend/
+
+# Saídas de build e dependências, que são geradas dentro da imagem.
+**/bin/
+**/obj/
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/

@@ -1,9 +1,12 @@
-# Ambiente de desenvolvimento da v2.
-# Por enquanto sobe só o PostgreSQL; a API e o frontend serão adicionados aqui depois.
+# Aplicação completa: a API (que também serve o site Angular) e o PostgreSQL.
 #
-#   docker compose up -d     # sobe o banco em segundo plano
-#   docker compose down      # para o banco (os dados ficam no volume)
-#   docker compose down -v   # para o banco e APAGA os dados
+#   docker compose up --build    # constrói a imagem e sobe tudo: http://localhost:8080
+#   docker compose down          # para tudo (os dados ficam no volume)
+#   docker compose down -v       # para tudo e APAGA os dados
+#
+# Para desenvolver com dotnet run e ng serve, suba só o banco:
+#
+#   docker compose up -d db
 name: encurtador
 
 services:
@@ -25,6 +28,20 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  app:
+    build: .
+    environment:
+      ConnectionStrings__Encurtador: Host=db;Database=encurtador;Username=encurtador;Password=encurtador
+      # Chave apenas para uso local; em produção, use um segredo longo e aleatório.
+      Jwt__Chave: ${JWT_CHAVE:-chave-local-do-docker-compose-troque-em-producao}
+      # Cria ou atualiza as tabelas quando a API inicia.
+      Banco__AplicarMigracoesAoIniciar: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres-dados:
