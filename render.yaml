@@ -25,9 +25,13 @@ services:
         generateValue: true
       - key: Banco__AplicarMigracoesAoIniciar
         value: "true"
-      # As requisições chegam pelo proxy do Render, que informa o IP do visitante e o https.
+      # As requisições passam pelo Cloudflare e pelo proxy do Render antes de chegar à API.
+      # O X-Forwarded-For chega como "visitante, Cloudflare, proxy interno", então o IP do
+      # visitante é lido do cabeçalho que o Cloudflare preenche só com ele.
       - key: ProxyReverso__Habilitado
         value: "true"
+      - key: ProxyReverso__CabecalhoDoIp
+        value: CF-Connecting-IP
       # Porta em que a imagem do ASP.NET Core escuta.
       - key: PORT
         value: "8080"
