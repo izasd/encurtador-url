@@ -1,0 +1,48 @@
+<section class="cartao pagina-conta" aria-labelledby="titulo-entrar">
+  <h1 id="titulo-entrar">Entrar</h1>
+  <p class="subtitulo">Encurte links e acompanhe quem clicou neles.</p>
+
+  @if (sessaoExpirada) {
+    <p class="alerta alerta-aviso" role="status">Sua sessão expirou. Entre de novo para continuar.</p>
+  }
+
+  <form [formGroup]="formulario" (ngSubmit)="entrar()" novalidate>
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" formControlName="email" autocomplete="email"
+        [attr.aria-invalid]="invalido('email')" aria-describedby="erro-email">
+      @if (invalido('email')) {
+        <span id="erro-email" class="erro-campo">
+          {{ formulario.controls.email.hasError('required') ? 'Informe seu e-mail.' : 'Informe um e-mail válido.' }}
+        </span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" formControlName="senha" autocomplete="current-password"
+        [attr.aria-invalid]="invalido('senha')" aria-describedby="erro-senha">
+      @if (invalido('senha')) {
+        <span id="erro-senha" class="erro-campo">Informe sua senha.</span>
+      }
+    </div>
+
+    @if (erro(); as mensagem) {
+      <p class="alerta alerta-erro" role="alert">{{ mensagem }}</p>
+    }
+
+    <button class="botao botao-largo" type="submit" [disabled]="enviando()">Entrar</button>
+  </form>
+
+  <p class="separador">ou</p>
+
+  <button class="botao botao-secundario botao-largo" type="button" [disabled]="enviando()"
+    (click)="entrarComoVisitante()">
+    Entrar como visitante
+  </button>
+  <p class="dica nota-visitante">
+    Cria uma conta temporária com links e cliques de exemplo, apagada em 24 horas.
+  </p>
+
+  <p class="troca-pagina">Ainda não tem conta? <a routerLink="/cadastro">Criar conta</a></p>
+</section>

@@ -1,0 +1,149 @@
+@Encurtador.Api_HostAddress = http://localhost:5198
+
+### Cria uma conta
+POST {{Encurtador.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza",
+  "email": "ana@exemplo.com",
+  "senha": "senha-forte-123"
+}
+
+### Entra e recebe o token JWT (as requisições de links abaixo usam este token)
+# @name login
+POST {{Encurtador.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "senha-forte-123"
+}
+
+### Senha errada -> 401 (mesma resposta de e-mail sem conta)
+POST {{Encurtador.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "senha-errada"
+}
+
+### Cria um link curto
+# @name criarLink
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://learn.microsoft.com/dotnet/"
+}
+
+### Lista os links do usuário (mais recentes primeiro)
+GET {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Accept: application/json
+
+### Sem token -> 401
+GET {{Encurtador.Api_HostAddress}}/api/links
+
+### Redireciona para a URL original (público, sem token) e registra o clique
+GET {{Encurtador.Api_HostAddress}}/{{criarLink.response.body.$.codigo}}
+Referer: https://t.co/exemplo
+CF-IPCountry: BR
+
+### Estatísticas do link criado acima, com os dias no fuso de Brasília
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=America/Sao_Paulo
+Authorization: Bearer {{login.response.body.$.token}}
+Accept: application/json
+
+### Fuso horário inválido -> 400
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/estatisticas?fusoHorario=Lua/Crateras
+Authorization: Bearer {{login.response.body.$.token}}
+
+### QR Code do link criado acima (PNG; ?tamanho= de 2 a 40 pixels por módulo)
+GET {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}/qrcode?tamanho=8
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Desativa o link criado acima (o redirecionamento passa a responder 410)
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "ativo": false
+}
+
+### Reativa e define uma expiração (ISO 8601 com fuso)
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "ativo": true,
+  "expiraEm": "2026-12-31T23:59:59-03:00"
+}
+
+### Remove a expiração (null) sem mexer no resto
+PATCH {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/merge-patch+json
+
+{
+  "expiraEm": null
+}
+
+### Exclui o link e as estatísticas dele -> 204
+DELETE {{Encurtador.Api_HostAddress}}/api/links/{{criarLink.response.body.$.codigo}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Cria um link com código personalizado (4 a 10 letras/números)
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "github"
+}
+
+### Mesmo código personalizado de novo -> 409
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "github"
+}
+
+### Código personalizado inválido -> 400
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://github.com/",
+  "codigo": "ab"
+}
+
+### URL com acento: é salva normalizada ("promoção" vira "promo%C3%A7%C3%A3o")
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "https://exemplo.com/promoção"
+}
+
+### URL inválida -> 400
+POST {{Encurtador.Api_HostAddress}}/api/links
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "urlOriginal": "ftp://exemplo.com"
+}
+
+### Código inexistente -> 404
+GET {{Encurtador.Api_HostAddress}}/naoexiste

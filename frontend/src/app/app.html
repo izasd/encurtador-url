@@ -1,0 +1,27 @@
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cabecalho">
+  <div class="cabecalho-interno">
+    <a class="logo" routerLink="/links">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" aria-hidden="true">
+        <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1" />
+        <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
+      </svg>
+      <span>encurtador</span>
+    </a>
+
+    @if (sessao.usuario(); as usuario) {
+      <nav class="conta" aria-label="Conta">
+        <span class="conta-nome">{{ usuario.nome }}</span>
+        <button type="button" class="botao-cabecalho" (click)="sair()">Sair</button>
+      </nav>
+    }
+  </div>
+</header>
+
+<main id="conteudo" class="conteudo" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="rodape">Encurtador de links · ASP.NET Core, PostgreSQL e Angular</footer>

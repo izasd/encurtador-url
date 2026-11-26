@@ -1,0 +1,42 @@
+<section class="cartao pagina-conta" aria-labelledby="titulo-cadastro">
+  <h1 id="titulo-cadastro">Criar conta</h1>
+  <p class="subtitulo">Seus links ficam salvos e só você vê as estatísticas deles.</p>
+
+  <form [formGroup]="formulario" (ngSubmit)="cadastrar()" novalidate>
+    <div class="campo">
+      <label for="nome">Nome</label>
+      <input id="nome" type="text" formControlName="nome" autocomplete="name"
+        [attr.aria-invalid]="mensagem('nome') !== null" aria-describedby="erro-nome">
+      @if (mensagem('nome'); as texto) {
+        <span id="erro-nome" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" formControlName="email" autocomplete="email"
+        [attr.aria-invalid]="mensagem('email') !== null" aria-describedby="erro-email">
+      @if (mensagem('email'); as texto) {
+        <span id="erro-email" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" formControlName="senha" autocomplete="new-password"
+        [attr.aria-invalid]="mensagem('senha') !== null" aria-describedby="dica-senha erro-senha">
+      <span id="dica-senha" class="dica">De 8 a 128 caracteres.</span>
+      @if (mensagem('senha'); as texto) {
+        <span id="erro-senha" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    @if (erro(); as texto) {
+      <p class="alerta alerta-erro" role="alert">{{ texto }}</p>
+    }
+
+    <button class="botao botao-largo" type="submit" [disabled]="enviando()">Criar conta</button>
+  </form>
+
+  <p class="troca-pagina">Já tem conta? <a routerLink="/entrar">Entrar</a></p>
+</section>

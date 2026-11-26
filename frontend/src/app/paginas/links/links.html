@@ -1,0 +1,174 @@
+@if (sessao.usuario()?.ehVisitante) {
+  <aside class="alerta alerta-aviso aviso-visitante">
+    <strong>Você está numa conta de visitante.</strong>
+    Os links de exemplo e os que você criar serão apagados em 24 horas.
+    <button type="button" class="link-botao" (click)="criarConta()">Criar uma conta</button>
+  </aside>
+}
+
+<section class="cartao" aria-labelledby="titulo-novo">
+  <h2 id="titulo-novo" class="titulo-cartao">Encurtar um link</h2>
+
+  <form class="formulario-novo" [formGroup]="formulario" (ngSubmit)="criar()" novalidate>
+    <div class="campo campo-url">
+      <label for="url">URL original</label>
+      <input id="url" type="url" formControlName="urlOriginal" placeholder="https://exemplo.com/um-endereco-bem-longo"
+        [attr.aria-invalid]="mensagem('urlOriginal') !== null" aria-describedby="erro-url">
+      @if (mensagem('urlOriginal'); as texto) {
+        <span id="erro-url" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <div class="campo campo-codigo">
+      <label for="codigo">Código personalizado</label>
+      <input id="codigo" type="text" formControlName="codigo" placeholder="ex.: promo2026" autocomplete="off"
+        spellcheck="false" [attr.aria-invalid]="mensagem('codigo') !== null" aria-describedby="dica-codigo erro-codigo">
+      <span id="dica-codigo" class="dica">Opcional: de 4 a 10 letras ou números. Em branco, geramos um.</span>
+      @if (mensagem('codigo'); as texto) {
+        <span id="erro-codigo" class="erro-campo">{{ texto }}</span>
+      }
+    </div>
+
+    <button class="botao botao-encurtar" type="submit" [disabled]="enviando()">Encurtar</button>
+  </form>
+
+  @if (erroGeral(); as texto) {
+    <p class="alerta alerta-erro" role="alert">{{ texto }}</p>
+  }
+
+  @if (criado(); as link) {
+    <output class="alerta alerta-sucesso criado">
+      <span>Link criado: <a [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a></span>
+      <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)">
+        {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
+      </button>
+    </output>
+  }
+</section>
+
+<section class="cartao" aria-labelledby="titulo-links">
+  <div class="cabecalho-secao">
+    <h1 id="titulo-links">Meus links</h1>
+    @if (links.hasValue() && itens().length > 0) {
+      <span class="contagem">{{ itens().length }} {{ itens().length === 1 ? 'link' : 'links' }}</span>
+    }
+  </div>
+
+  @if (falhaAoCopiar()) {
+    <p class="alerta alerta-aviso" role="alert">
+      Não foi possível copiar automaticamente. Selecione o link e copie com Ctrl+C.
+    </p>
+  }
+
+  @if (links.error()) {
+    <div class="alerta alerta-erro" role="alert">
+      Não foi possível carregar seus links.
+      <button type="button" class="link-botao" (click)="links.reload()">Tentar de novo</button>
+    </div>
+  } @else if (links.isLoading() && itens().length === 0) {
+    <p class="estado">Carregando seus links…</p>
+  } @else if (itens().length === 0) {
+    <p class="estado">Você ainda não encurtou nenhum link. Comece pelo formulário acima.</p>
+  } @else {
+    <ul class="lista" [class.recarregando]="links.isLoading()">
+      @for (link of itens(); track link.codigo) {
+        <li class="item" [class.fora-do-ar]="link.situacao !== 'disponivel'">
+          <div class="item-linha">
+            <div class="item-textos">
+              <span class="linha-titulo">
+                <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+                @switch (link.situacao) {
+                  @case ('desativado') {
+                    <span class="selo">Desativado</span>
+                  }
+                  @case ('expirado') {
+                    <span class="selo">Expirado</span>
+                  }
+                  @default {
+                    @if (link.expiraEm) {
+                      <span class="selo">Expira em {{ link.expiraEm | date: 'dd/MM/yyyy' }}</span>
+                    }
+                  }
+                }
+              </span>
+              <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
+              <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
+            </div>
+
+            <div class="acoes">
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)"
+                [attr.aria-label]="'Copiar ' + link.urlCurta">
+                {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
+              </button>
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="alternarQr(link.codigo)"
+                [attr.aria-expanded]="qrAberto() === link.codigo" [attr.aria-controls]="'qr-' + link.codigo">
+                QR Code
+              </button>
+              <a class="botao botao-secundario botao-pequeno" [routerLink]="['/links', link.codigo, 'estatisticas']"
+                [attr.aria-label]="'Estatísticas de ' + link.urlCurta">Estatísticas</a>
+              <button type="button" class="botao botao-secundario botao-pequeno" (click)="alternarGerenciar(link.codigo)"
+                [attr.aria-expanded]="gerenciando() === link.codigo" [attr.aria-controls]="'gerenciar-' + link.codigo">
+                Gerenciar
+              </button>
+            </div>
+          </div>
+
+          @if (gerenciando() === link.codigo) {
+            <div class="painel painel-gerenciar" [id]="'gerenciar-' + link.codigo">
+              <div class="grupo">
+                <label class="opcao">
+                  <input #ativo type="checkbox" [checked]="link.ativo" [disabled]="salvando() === link.codigo"
+                    (change)="alterarAtivo(link, ativo.checked)">
+                  Link ativo
+                </label>
+                <p class="dica">Desativado, o link curto deixa de redirecionar e os cliques não são contados.</p>
+              </div>
+
+              <div class="grupo">
+                <label [for]="'expira-' + link.codigo">Expira no fim do dia</label>
+                <div class="linha-expiracao">
+                  <input #data type="date" [id]="'expira-' + link.codigo" [min]="hoje" [value]="dataLocal(link.expiraEm)">
+                  <button type="button" class="botao botao-secundario botao-pequeno" [disabled]="salvando() === link.codigo"
+                    (click)="salvarExpiracao(link, data.value)">Salvar data</button>
+                  @if (link.expiraEm) {
+                    <button type="button" class="link-botao" [disabled]="salvando() === link.codigo"
+                      (click)="removerExpiracao(link)">Remover expiração</button>
+                  }
+                </div>
+              </div>
+
+              @if (erroDaAcao(); as erro) {
+                @if (erro.codigo === link.codigo) {
+                  <p class="erro-campo" role="alert">{{ erro.mensagem }}</p>
+                }
+              }
+
+              <div class="grupo zona-exclusao">
+                @if (confirmandoExclusao() === link.codigo) {
+                  <p>Excluir este link de vez? As estatísticas dele também serão apagadas.</p>
+                  <div class="acoes">
+                    <button type="button" class="botao botao-perigo botao-pequeno" [disabled]="salvando() === link.codigo"
+                      (click)="excluir(link)">Excluir</button>
+                    <button type="button" class="botao botao-secundario botao-pequeno"
+                      (click)="confirmandoExclusao.set(null)">Cancelar</button>
+                  </div>
+                } @else {
+                  <button type="button" class="botao botao-perigo-contorno botao-pequeno"
+                    (click)="confirmandoExclusao.set(link.codigo)">Excluir link</button>
+                }
+              </div>
+            </div>
+          }
+
+          @if (qrAberto() === link.codigo) {
+            <div class="painel" [id]="'qr-' + link.codigo">
+              <app-qr-code [codigo]="link.codigo" [urlCurta]="link.urlCurta" />
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <p class="visualmente-oculto" aria-live="polite">{{ copiado() ? 'Link copiado.' : '' }}</p>
+</section>

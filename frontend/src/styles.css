@@ -1,0 +1,327 @@
+/*
+ * Tokens de cor. O tema escuro segue a preferência do sistema.
+ * As cores de texto passam de 4,5:1 nos dois temas, e a cor dos gráficos (--serie)
+ * foi validada para o cartão de cada tema (faixa de luminosidade, croma e contraste).
+ */
+:root {
+  color-scheme: light;
+  --pagina: #f4f6f5;
+  --cartao: #ffffff;
+  --borda: #dfe5e2;
+  --realce: #eef3f1;
+  --texto: #15201c;
+  --texto-secundario: #4b5853;
+  --texto-suave: #66736e;
+  --cabecalho: #0d4f3c;
+  --texto-cabecalho: #ffffff;
+  --marca: #0d4f3c;
+  --marca-hover: #0a3e2f;
+  --texto-sobre-marca: #ffffff;
+  --link: #0f6b57;
+  --foco: #1a8870;
+  --erro: #b3261e;
+  --erro-fundo: #fdeceb;
+  --texto-sobre-erro: #ffffff;
+  --aviso: #6b4e00;
+  --aviso-fundo: #fff6dc;
+  --sucesso-fundo: #e6f4ef;
+  --serie: #1a8870;
+  --serie-lavagem: rgb(26 136 112 / 0.1);
+  --serie-outros: #aab5b1;
+  --grade: #e8ecea;
+  --eixo: #c5cecb;
+  --sombra: 0 1px 2px rgb(16 32 26 / 0.06), 0 6px 20px rgb(16 32 26 / 0.06);
+  --raio: 12px;
+  --raio-pequeno: 8px;
+  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --pagina: #0f1312;
+    --cartao: #171c1b;
+    --borda: #2a3230;
+    --realce: #1e2523;
+    --texto: #edf2f0;
+    --texto-secundario: #bfc9c5;
+    --texto-suave: #93a09b;
+    --cabecalho: #10241e;
+    --texto-cabecalho: #edf2f0;
+    --marca: #22a184;
+    --marca-hover: #2bb08f;
+    --texto-sobre-marca: #04140f;
+    --link: #5ccfb1;
+    --foco: #5ccfb1;
+    --erro: #ff8f85;
+    --erro-fundo: #3a1f1d;
+    --texto-sobre-erro: #2a0b08;
+    --aviso: #f3d27a;
+    --aviso-fundo: #2d2714;
+    --sucesso-fundo: #12302a;
+    --serie: #22a184;
+    --serie-lavagem: rgb(34 161 132 / 0.14);
+    --serie-outros: #4f5b57;
+    --grade: #232a28;
+    --eixo: #3a4441;
+    --sombra: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--pagina);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 2px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.cartao {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1.5rem;
+}
+
+/* Formulários */
+.campo {
+  display: grid;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.campo label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.campo input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--eixo);
+  border-radius: var(--raio-pequeno);
+  background: var(--cartao);
+  color: var(--texto);
+}
+
+.campo input:focus-visible {
+  outline-offset: 0;
+  border-color: var(--foco);
+}
+
+.campo input[aria-invalid="true"] {
+  border-color: var(--erro);
+}
+
+.dica {
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+}
+
+.erro-campo {
+  font-size: 0.8125rem;
+  color: var(--erro);
+}
+
+/* Botões */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  border: 1px solid transparent;
+  border-radius: var(--raio-pequeno);
+  background: var(--marca);
+  color: var(--texto-sobre-marca);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: var(--marca-hover);
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background: transparent;
+  color: var(--texto);
+  border-color: var(--eixo);
+}
+
+.botao-secundario:hover {
+  background: var(--realce);
+}
+
+/* Ações destrutivas (excluir). */
+.botao-perigo,
+.botao-perigo:hover {
+  background: var(--erro);
+  color: var(--texto-sobre-erro);
+}
+
+.botao-perigo-contorno {
+  background: transparent;
+  color: var(--erro);
+  border-color: currentColor;
+}
+
+.botao-perigo-contorno:hover {
+  background: var(--erro-fundo);
+}
+
+.botao-pequeno {
+  padding: 0.375rem 0.625rem;
+  font-size: 0.875rem;
+}
+
+.botao-largo {
+  width: 100%;
+}
+
+/* Mensagens */
+.alerta {
+  padding: 0.75rem 1rem;
+  border-radius: var(--raio-pequeno);
+  font-size: 0.9375rem;
+}
+
+.alerta-erro {
+  background: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.alerta-aviso {
+  background: var(--aviso-fundo);
+  color: var(--aviso);
+}
+
+.alerta-sucesso {
+  background: var(--sucesso-fundo);
+  color: var(--texto);
+}
+
+/* Botão com aparência de link (ações dentro de um texto). */
+.link-botao {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* Login e cadastro */
+.pagina-conta {
+  max-width: 26rem;
+  margin: 1rem auto 0;
+}
+
+.pagina-conta h1 {
+  margin-bottom: 0.25rem;
+}
+
+.pagina-conta .subtitulo {
+  margin-bottom: 1.5rem;
+  color: var(--texto-secundario);
+}
+
+.pagina-conta .alerta {
+  margin-bottom: 1rem;
+}
+
+.separador {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+.separador::before,
+.separador::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--borda);
+}
+
+.nota-visitante {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.troca-pagina {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: var(--texto-secundario);
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
