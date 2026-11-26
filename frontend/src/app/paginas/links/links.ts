@@ -8,7 +8,7 @@ import { QrCode } from '../../componentes/qr-code/qr-code';
 import { Link } from '../../nucleo/api';
 import { lerErros } from '../../nucleo/erros';
 import { Sessao } from '../../nucleo/sessao';
-import { urlLegivel } from '../../nucleo/url';
+import { enderecoDoLinkCurto, urlLegivel } from '../../nucleo/url';
 
 type Campo = 'urlOriginal' | 'codigo';
 
@@ -38,7 +38,11 @@ export class Links {
   protected readonly links = httpResource<Link[]>(() => '/api/links', { defaultValue: [] });
 
   protected readonly itens = computed(() =>
-    this.links.value().map((link) => ({ ...link, urlLegivel: urlLegivel(link.urlOriginal) })),
+    this.links.value().map((link) => ({
+      ...link,
+      urlLegivel: urlLegivel(link.urlOriginal),
+      endereco: enderecoDoLinkCurto(link.urlCurta, link.codigo),
+    })),
   );
 
   // A URL só precisa começar com http:// ou https://: espaços e acentos são aceitos,

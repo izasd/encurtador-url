@@ -11,8 +11,9 @@
   z-index: 10;
   padding: 0.5rem 0.75rem;
   border-radius: var(--raio-pequeno);
-  background: var(--cartao);
-  color: var(--texto);
+  background: var(--link);
+  color: var(--texto-sobre-link);
+  font-weight: 700;
 }
 
 .pular:focus {
@@ -20,8 +21,7 @@
 }
 
 .cabecalho {
-  background: var(--cabecalho);
-  color: var(--texto-cabecalho);
+  border-bottom: 1px solid var(--borda);
 }
 
 .cabecalho-interno {
@@ -29,26 +29,27 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 4.125rem; /* mesma altura com ou sem o botão "Sair" */
-  max-width: 64rem;
+  min-height: 4rem; /* mesma altura com ou sem o botão "Sair" */
+  max-width: var(--largura);
   margin: 0 auto;
   padding: 0.75rem 1.25rem;
 }
 
+/* A marca é escrita como um link: tinta com o sublinhado azul. */
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: inherit;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  text-decoration: none;
+  color: var(--texto);
+  font-size: 1.3125rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  text-decoration: underline;
+  text-decoration-color: var(--link);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
 }
 
-.logo:focus-visible,
-.botao-cabecalho:focus-visible {
-  outline-color: currentColor;
+.logo:hover {
+  color: var(--texto);
+  text-decoration-thickness: 5px;
 }
 
 .conta {
@@ -63,29 +64,19 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.9375rem;
+  color: var(--texto-secundario);
 }
 
-.botao-cabecalho {
+.conta .botao {
   flex-shrink: 0;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid currentColor;
-  border-radius: var(--raio-pequeno);
-  background: transparent;
-  color: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.botao-cabecalho:hover {
-  background: rgb(255 255 255 / 0.12);
 }
 
 .conteudo {
   flex: 1;
   width: 100%;
-  max-width: 64rem;
+  max-width: var(--largura);
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
+  padding: 2.5rem 1.25rem 4rem;
 }
 
 .conteudo:focus {
@@ -93,8 +84,16 @@
 }
 
 .rodape {
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
   padding: 1.25rem;
-  text-align: center;
   font-size: 0.8125rem;
   color: var(--texto-suave);
+}
+
+@media (max-width: 40rem) {
+  .conteudo {
+    padding-top: 1.5rem;
+  }
 }

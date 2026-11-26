@@ -1,4 +1,4 @@
-import { destinoSeguro, urlLegivel } from './url';
+import { destinoSeguro, enderecoDoLinkCurto, urlLegivel } from './url';
 
 describe('destinoSeguro', () => {
   it.each(['/links', '/links/abc123/estatisticas'])('aceita o caminho interno %s', (caminho) => {
@@ -20,5 +20,16 @@ describe('urlLegivel', () => {
 
   it('devolve a URL como está quando a codificação é inválida', () => {
     expect(urlLegivel('https://exemplo.com/%E0%A4%A')).toBe('https://exemplo.com/%E0%A4%A');
+  });
+});
+
+describe('enderecoDoLinkCurto', () => {
+  it('tira o protocolo e o código, deixando o endereço com a barra', () => {
+    expect(enderecoDoLinkCurto('https://encurtador-4qz0.onrender.com/6Le97y', '6Le97y')).toBe('encurtador-4qz0.onrender.com/');
+    expect(enderecoDoLinkCurto('http://localhost:5198/abc123', 'abc123')).toBe('localhost:5198/');
+  });
+
+  it('não repete o código quando o link curto não termina nele', () => {
+    expect(enderecoDoLinkCurto('https://encurtador.com/outro', 'abc123')).toBe('');
   });
 });

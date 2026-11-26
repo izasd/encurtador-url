@@ -1,32 +1,79 @@
 :host {
   display: grid;
-  gap: 1.25rem;
+  gap: 3rem;
 }
 
 .aviso-visitante strong {
   margin-right: 0.25rem;
 }
 
-.titulo-cartao {
+.titulo-novo {
   margin-bottom: 1rem;
 }
 
-/* Formulário: URL larga, código estreito e botão na mesma linha (empilham no celular). */
+/*
+ * Rótulos, campos e mensagens em três linhas de uma grade (subgrid), para os campos e o botão
+ * ficarem alinhados numa barra só, mesmo quando só um dos campos tem mensagem embaixo.
+ */
 .formulario-novo {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 15rem auto;
-  align-items: start;
-  gap: 0 1rem;
+  grid-template-columns: minmax(0, 1fr) 14rem auto;
+  row-gap: 0.375rem;
 }
 
 .formulario-novo .campo {
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   margin-bottom: 0;
 }
 
-.botao-encurtar {
-  margin-top: 1.8rem;
+.formulario-novo input {
+  min-height: 3.25rem;
+  border-width: 2px;
+  border-color: var(--texto);
+  font-size: 1.0625rem;
 }
 
+.campo-url input {
+  border-radius: var(--raio-pequeno) 0 0 var(--raio-pequeno);
+}
+
+.campo-codigo input {
+  margin-left: -2px; /* a borda é compartilhada com o campo da URL */
+  border-radius: 0;
+}
+
+/* Repetidos aqui porque a borda acima é mais específica que as regras globais de .campo. */
+.formulario-novo input[aria-invalid="true"] {
+  border-color: var(--erro);
+}
+
+.formulario-novo input:focus-visible {
+  position: relative;
+  z-index: 1;
+  border-color: var(--foco);
+}
+
+.campo-codigo .mensagens {
+  padding-left: 0.75rem;
+}
+
+.mensagens {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.botao-encurtar {
+  grid-row: 2;
+  grid-column: 3;
+  min-height: 3.25rem;
+  margin-left: -2px;
+  padding-inline: 1.75rem;
+  border-radius: 0 var(--raio-pequeno) var(--raio-pequeno) 0;
+  font-size: 1.0625rem;
+}
+
+/* O link recém-criado aparece "selecionado", pronto para copiar. */
 .criado {
   display: flex;
   flex-wrap: wrap;
@@ -34,11 +81,24 @@
   justify-content: space-between;
   gap: 0.5rem 1rem;
   margin-top: 1rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  border-radius: var(--raio-pequeno);
+  background: var(--selecao);
 }
 
 .criado a {
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--texto);
   overflow-wrap: anywhere;
+}
+
+.criado .botao {
+  border-color: var(--texto);
+  background: var(--pagina);
+}
+
+.criado .botao:hover {
+  background: var(--realce);
 }
 
 .alerta-erro,
@@ -51,7 +111,8 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--texto);
 }
 
 .contagem {
@@ -60,8 +121,7 @@
 }
 
 .estado {
-  padding: 1.5rem 0;
-  text-align: center;
+  padding: 2rem 0;
   color: var(--texto-secundario);
 }
 
@@ -77,57 +137,64 @@
 }
 
 .item {
-  padding: 0.875rem 0;
+  padding: 1.25rem 0;
+}
+
+.item + .item {
   border-top: 1px solid var(--borda);
 }
 
 .item-linha {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.75rem 1.5rem;
 }
 
 .item-textos {
   display: grid;
+  gap: 0.125rem;
   min-width: 0;
-  flex: 1 1 18rem;
+  flex: 1 1 20rem;
 }
 
 .linha-titulo {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.5rem;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
 }
 
-.url-curta {
-  font-weight: 600;
-  overflow-wrap: anywhere;
+.url-curta .codigo {
+  font-size: 1.75rem;
 }
 
-/* Links desativados ou expirados ficam mais apagados; o selo diz o motivo. */
-.fora-do-ar .url-curta {
-  color: var(--texto-secundario);
+/* Links desativados ou expirados: o código riscado e apagado; o selo diz o motivo. */
+.fora-do-ar .url-curta .codigo {
+  color: var(--texto-suave);
+  text-decoration-line: line-through;
 }
 
 .selo {
   padding: 0.0625rem 0.5rem;
-  border: 1px solid var(--borda);
+  border: 1px solid var(--borda-campo);
   border-radius: 999px;
-  background: var(--realce);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--texto-secundario);
   white-space: nowrap;
+}
+
+.selo-fora {
+  border-color: var(--texto);
+  color: var(--texto);
 }
 
 .url-original {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.875rem;
   color: var(--texto-secundario);
 }
 
@@ -142,12 +209,28 @@
   gap: 0.5rem;
 }
 
+/* Ações de cada link: fichas preenchidas, sem contorno, para quatro botões por linha não pesarem. */
+.item-linha .acoes .botao-secundario {
+  border-color: transparent;
+  background: var(--realce);
+}
+
+.item-linha .acoes .botao-secundario:hover {
+  background: var(--borda);
+}
+
+.item-linha .acoes .botao-secundario[aria-expanded="true"],
+.item-linha .acoes .botao-secundario.ativo {
+  border-color: var(--link);
+  background: var(--selecao);
+}
+
 .painel {
   display: grid;
   gap: 1rem;
-  margin-top: 0.875rem;
-  padding: 1rem;
-  border-radius: var(--raio-pequeno);
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--raio-painel);
   background: var(--realce);
 }
 
@@ -158,7 +241,7 @@
 }
 
 .grupo label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.9375rem;
 }
 
@@ -171,7 +254,7 @@
 .opcao input {
   width: 1.125rem;
   height: 1.125rem;
-  accent-color: var(--marca);
+  accent-color: var(--link);
 }
 
 .linha-expiracao {
@@ -182,8 +265,9 @@
 }
 
 .linha-expiracao input {
-  padding: 0.375rem 0.5rem;
-  border: 1px solid var(--eixo);
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--borda-campo);
   border-radius: var(--raio-pequeno);
   background: var(--cartao);
   color: var(--texto);
@@ -194,13 +278,40 @@
   border-top: 1px solid var(--borda);
 }
 
+/* No celular, os campos e o botão empilham, cada um com os cantos arredondados. */
 @media (max-width: 40rem) {
   .formulario-novo {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
+    row-gap: 1rem;
+  }
+
+  .formulario-novo .campo {
+    grid-row: auto;
+    grid-template-rows: none;
+  }
+
+  .formulario-novo input,
+  .botao-encurtar {
+    margin-left: 0;
+    border-radius: var(--raio-pequeno);
   }
 
   .botao-encurtar {
-    margin-top: 0;
+    grid-row: auto;
+    grid-column: auto;
+  }
+
+  .campo-codigo .mensagens {
+    padding-left: 0;
+  }
+
+  .url-curta .codigo {
+    font-size: 1.5rem;
+  }
+
+  .item-linha .acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
   }
 }

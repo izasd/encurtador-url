@@ -1,69 +1,72 @@
 /*
- * Tokens de cor. O tema escuro segue a preferência do sistema.
- * As cores de texto passam de 4,5:1 nos dois temas, e a cor dos gráficos (--serie)
- * foi validada para o cartão de cada tema (faixa de luminosidade, croma e contraste).
+ * Identidade: o vocabulário do próprio hiperlink.
+ *   --link       azul: o que leva a algum lugar (o link curto, ações principais).
+ *   --visitado   roxo, a cor de link visitado: o que já foi clicado (cliques, gráficos).
+ *   --selecao    azul da seleção de texto: o que está selecionado, copiado ou aberto.
+ * Todo o resto fica em tinta e cinza. O tema escuro segue a preferência do sistema.
+ * Os textos passam de 4,5:1 nos dois temas; as bordas de campo, de 3:1. A cor dos gráficos
+ * (--serie) foi validada para cada tema (faixa de luminosidade, croma e contraste com o fundo).
  */
 :root {
   color-scheme: light;
-  --pagina: #f4f6f5;
+  --pagina: #ffffff;
   --cartao: #ffffff;
-  --borda: #dfe5e2;
-  --realce: #eef3f1;
-  --texto: #15201c;
-  --texto-secundario: #4b5853;
-  --texto-suave: #66736e;
-  --cabecalho: #0d4f3c;
-  --texto-cabecalho: #ffffff;
-  --marca: #0d4f3c;
-  --marca-hover: #0a3e2f;
-  --texto-sobre-marca: #ffffff;
-  --link: #0f6b57;
-  --foco: #1a8870;
-  --erro: #b3261e;
-  --erro-fundo: #fdeceb;
+  --realce: #f2f3f8;
+  --borda: #dcdeea;
+  --borda-campo: #8a8da8;
+  --texto: #16183a;
+  --texto-secundario: #4a4d6a;
+  --texto-suave: #62657f;
+  --link: #1a35e3;
+  --link-hover: #1428b8;
+  --texto-sobre-link: #ffffff;
+  --visitado: #6a2bc4;
+  --selecao: #cfdcff;
+  --foco: #1a35e3;
+  --erro: #c0182f;
+  --erro-fundo: #fdebed;
   --texto-sobre-erro: #ffffff;
-  --aviso: #6b4e00;
-  --aviso-fundo: #fff6dc;
-  --sucesso-fundo: #e6f4ef;
-  --serie: #1a8870;
-  --serie-lavagem: rgb(26 136 112 / 0.1);
-  --serie-outros: #aab5b1;
-  --grade: #e8ecea;
-  --eixo: #c5cecb;
-  --sombra: 0 1px 2px rgb(16 32 26 / 0.06), 0 6px 20px rgb(16 32 26 / 0.06);
-  --raio: 12px;
-  --raio-pequeno: 8px;
-  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --aviso: #5e4300;
+  --aviso-fundo: #fff0bf;
+  --serie: #6a2bc4;
+  --serie-lavagem: rgb(106 43 196 / 0.1);
+  --serie-outros: #a9acc4;
+  --grade: #eceef5;
+  --eixo: #c3c6d8;
+  --sombra: 0 2px 10px rgb(22 24 58 / 0.12);
+  --raio-pequeno: 6px;
+  --raio-painel: 10px;
+  --largura: 60rem;
+  --fonte: "Atkinson Hyperlegible Next Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --pagina: #0f1312;
-    --cartao: #171c1b;
-    --borda: #2a3230;
-    --realce: #1e2523;
-    --texto: #edf2f0;
-    --texto-secundario: #bfc9c5;
-    --texto-suave: #93a09b;
-    --cabecalho: #10241e;
-    --texto-cabecalho: #edf2f0;
-    --marca: #22a184;
-    --marca-hover: #2bb08f;
-    --texto-sobre-marca: #04140f;
-    --link: #5ccfb1;
-    --foco: #5ccfb1;
-    --erro: #ff8f85;
-    --erro-fundo: #3a1f1d;
-    --texto-sobre-erro: #2a0b08;
-    --aviso: #f3d27a;
-    --aviso-fundo: #2d2714;
-    --sucesso-fundo: #12302a;
-    --serie: #22a184;
-    --serie-lavagem: rgb(34 161 132 / 0.14);
-    --serie-outros: #4f5b57;
-    --grade: #232a28;
-    --eixo: #3a4441;
+    --pagina: #11132b;
+    --cartao: #181b38;
+    --realce: #1f2343;
+    --borda: #2c3052;
+    --borda-campo: #6a6e96;
+    --texto: #ecedf7;
+    --texto-secundario: #b9bcd6;
+    --texto-suave: #9296b6;
+    --link: #9aabff;
+    --link-hover: #b5c1ff;
+    --texto-sobre-link: #0c1030;
+    --visitado: #c3a5ff;
+    --selecao: #2b3a88;
+    --foco: #9aabff;
+    --erro: #ff8e98;
+    --erro-fundo: #3a1a24;
+    --texto-sobre-erro: #2a0a10;
+    --aviso: #f2d27a;
+    --aviso-fundo: #33290e;
+    --serie: #a47cf5;
+    --serie-lavagem: rgb(164 124 245 / 0.14);
+    --serie-outros: #4a4e74;
+    --grade: #23274a;
+    --eixo: #3a3f66;
     --sombra: none;
   }
 }
@@ -78,11 +81,18 @@ body {
   margin: 0;
   font-family: var(--fonte);
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--texto);
   background: var(--pagina);
+  -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  background: var(--selecao);
+  color: var(--texto);
+}
+
+/* Escala tipográfica: 13, 14, 16, 18, 21, 24, 36, 48. */
 h1,
 h2,
 h3,
@@ -90,19 +100,34 @@ p {
   margin: 0;
 }
 
+/* Evita uma palavra sozinha na última linha de textos curtos. */
+p,
+.dica {
+  text-wrap: pretty;
+}
+
 h1 {
   font-size: 1.5rem;
-  line-height: 1.25;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 h2 {
   font-size: 1.125rem;
+  font-weight: 700;
   line-height: 1.3;
 }
 
 a {
   color: var(--link);
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration-thickness: 2px;
 }
 
 button,
@@ -115,33 +140,61 @@ input {
   outline-offset: 2px;
 }
 
-.cartao {
-  background: var(--cartao);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio);
-  box-shadow: var(--sombra);
-  padding: 1.5rem;
+/*
+ * O link curto: o endereço do site pequeno e apagado, o código grande e sublinhado.
+ * É o elemento principal de todas as telas, por isso o estilo é compartilhado.
+ */
+.link-curto {
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.link-curto .endereco {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+.link-curto .codigo {
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
+}
+
+a.link-curto:hover .codigo {
+  color: var(--link-hover);
+  text-decoration-thickness: 0.14em;
 }
 
 /* Formulários */
 .campo {
   display: grid;
   gap: 0.375rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.125rem;
 }
 
 .campo label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.9375rem;
 }
 
 .campo input {
   width: 100%;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid var(--eixo);
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--borda-campo);
   border-radius: var(--raio-pequeno);
   background: var(--cartao);
   color: var(--texto);
+}
+
+.campo input::placeholder {
+  color: var(--texto-suave);
+  opacity: 1;
 }
 
 .campo input:focus-visible {
@@ -151,6 +204,7 @@ input {
 
 .campo input[aria-invalid="true"] {
   border-color: var(--erro);
+  box-shadow: inset 0 0 0 1px var(--erro);
 }
 
 .dica {
@@ -159,7 +213,8 @@ input {
 }
 
 .erro-campo {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--erro);
 }
 
@@ -169,18 +224,20 @@ input {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.125rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
   border: 1px solid transparent;
   border-radius: var(--raio-pequeno);
-  background: var(--marca);
-  color: var(--texto-sobre-marca);
-  font-weight: 600;
+  background: var(--link);
+  color: var(--texto-sobre-link);
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
 }
 
 .botao:hover {
-  background: var(--marca-hover);
+  background: var(--link-hover);
+  color: var(--texto-sobre-link);
 }
 
 .botao:disabled {
@@ -191,11 +248,20 @@ input {
 .botao-secundario {
   background: transparent;
   color: var(--texto);
-  border-color: var(--eixo);
+  border-color: var(--borda-campo);
 }
 
 .botao-secundario:hover {
   background: var(--realce);
+  color: var(--texto);
+}
+
+/* Botão aberto (painel visível) ou que acabou de agir (link copiado): cor de seleção. */
+.botao-secundario[aria-expanded="true"],
+.botao-secundario.ativo {
+  border-color: var(--link);
+  background: var(--selecao);
+  color: var(--texto);
 }
 
 /* Ações destrutivas (excluir). */
@@ -213,10 +279,12 @@ input {
 
 .botao-perigo-contorno:hover {
   background: var(--erro-fundo);
+  color: var(--erro);
 }
 
 .botao-pequeno {
-  padding: 0.375rem 0.625rem;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.75rem;
   font-size: 0.875rem;
 }
 
@@ -241,47 +309,67 @@ input {
   color: var(--aviso);
 }
 
-.alerta-sucesso {
-  background: var(--sucesso-fundo);
-  color: var(--texto);
-}
-
 /* Botão com aparência de link (ações dentro de um texto). */
 .link-botao {
   padding: 0;
   border: 0;
   background: none;
   color: var(--link);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
   cursor: pointer;
 }
 
-/* Login e cadastro */
+.link-botao:hover {
+  color: var(--link-hover);
+  text-decoration-thickness: 2px;
+}
+
+.link-botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/*
+ * Login e cadastro: a demonstração do encurtamento à esquerda e o formulário à direita.
+ * Em telas estreitas, a demonstração fica em cima, mais compacta.
+ */
 .pagina-conta {
-  max-width: 26rem;
-  margin: 1rem auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 23rem);
+  align-items: start;
+  gap: 3rem 5rem;
+  padding-top: 1.5rem;
 }
 
-.pagina-conta h1 {
-  margin-bottom: 0.25rem;
+.formulario-conta h1 {
+  margin-bottom: 0.375rem;
 }
 
-.pagina-conta .subtitulo {
+.formulario-conta .subtitulo {
   margin-bottom: 1.5rem;
   color: var(--texto-secundario);
 }
 
-.pagina-conta .alerta {
-  margin-bottom: 1rem;
+.formulario-conta form {
+  margin-top: 1.5rem;
+}
+
+.formulario-conta .subtitulo + form {
+  margin-top: 0;
+}
+
+.formulario-conta .alerta {
+  margin-bottom: 1.125rem;
 }
 
 .separador {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.25rem 0;
+  margin: 1.5rem 0;
   font-size: 0.875rem;
   color: var(--texto-suave);
 }
@@ -295,14 +383,26 @@ input {
 
 .nota-visitante {
   margin-top: 0.5rem;
-  text-align: center;
 }
 
 .troca-pagina {
-  margin-top: 1.5rem;
-  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--borda);
   font-size: 0.9375rem;
   color: var(--texto-secundario);
+}
+
+@media (max-width: 52rem) {
+  .pagina-conta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .formulario-conta {
+    max-width: 26rem;
+  }
 }
 
 .visualmente-oculto {
