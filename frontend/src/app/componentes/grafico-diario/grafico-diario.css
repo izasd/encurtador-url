@@ -63,10 +63,10 @@ svg:focus-visible {
   stroke-linecap: round;
 }
 
-/* Ponto com anel da cor do cartão, para se destacar sobre a linha. */
+/* Ponto com anel da cor da página, para se destacar sobre a linha. */
 .ponto {
   fill: var(--serie);
-  stroke: var(--cartao);
+  stroke: var(--pagina);
   stroke-width: 2;
 }
 
@@ -133,7 +133,7 @@ td:last-child {
 th {
   position: sticky;
   top: 0;
-  background: var(--cartao);
+  background: var(--pagina);
   font-weight: 600;
   color: var(--texto-secundario);
 }

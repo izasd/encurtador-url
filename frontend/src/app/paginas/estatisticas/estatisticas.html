@@ -1,7 +1,7 @@
 <a class="voltar" routerLink="/links">← Meus links</a>
 
 @if (dados.error()) {
-  <section class="cartao">
+  <section>
     @if (naoEncontrado()) {
       <h1>Link não encontrado</h1>
       <p class="explicacao">Ele não existe ou pertence a outra conta.</p>
@@ -13,10 +13,11 @@
     }
   </section>
 } @else if (dados.value(); as estatisticas) {
-  <header class="cartao cabecalho-estatisticas">
+  <header class="cabecalho-estatisticas">
     <div class="identificacao">
-      <h1>Estatísticas</h1>
-      <a class="url-curta" [href]="estatisticas.urlCurta" target="_blank" rel="noopener">{{ estatisticas.urlCurta }}</a>
+      <h1><span class="visualmente-oculto">Estatísticas de </span><a class="link-curto url-curta"
+        [href]="estatisticas.urlCurta" target="_blank" rel="noopener"><span class="endereco">{{ endereco() }}</span><span
+        class="codigo">{{ estatisticas.codigo }}</span></a></h1>
       <span class="url-original" [title]="urlOriginal()">{{ urlOriginal() }}</span>
     </div>
 
@@ -27,27 +28,27 @@
   </header>
 
   @if (estatisticas.totalDeCliques === 0) {
-    <section class="cartao vazio">
+    <section class="vazio">
       <h2>Ainda não há cliques</h2>
       <p class="explicacao">Compartilhe o link curto: cada acesso aparece aqui em instantes.</p>
     </section>
   } @else {
-    <section class="cartao" [class.recarregando]="dados.isLoading()">
+    <section [class.recarregando]="dados.isLoading()">
       <app-grafico-diario titulo="Cliques por dia" [dias]="dias()" />
       <p class="dica fuso">Dias contados no fuso {{ estatisticas.fusoHorario }}.</p>
     </section>
 
     <div class="grade-categorias" [class.recarregando]="dados.isLoading()">
-      <section class="cartao">
+      <section>
         <app-grafico-barras titulo="País" [categorias]="paises()" [total]="estatisticas.totalDeCliques" />
       </section>
-      <section class="cartao">
+      <section>
         <app-grafico-barras titulo="Navegador" [categorias]="estatisticas.porNavegador" [total]="estatisticas.totalDeCliques" />
       </section>
-      <section class="cartao">
+      <section>
         <app-grafico-barras titulo="Dispositivo" [categorias]="estatisticas.porDispositivo" [total]="estatisticas.totalDeCliques" />
       </section>
-      <section class="cartao">
+      <section>
         <app-grafico-barras titulo="Origem" [categorias]="estatisticas.porReferer" [total]="estatisticas.totalDeCliques" />
       </section>
     </div>

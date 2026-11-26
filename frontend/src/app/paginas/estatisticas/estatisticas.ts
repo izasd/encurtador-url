@@ -6,7 +6,7 @@ import { GraficoBarras } from '../../componentes/grafico-barras/grafico-barras';
 import { GraficoDiario } from '../../componentes/grafico-diario/grafico-diario';
 import { hojeNoFuso, nomeDoPais, preencherDias } from '../../componentes/graficos/dados';
 import { Estatisticas as DadosDeEstatisticas } from '../../nucleo/api';
-import { urlLegivel } from '../../nucleo/url';
+import { enderecoDoLinkCurto, urlLegivel } from '../../nucleo/url';
 
 @Component({
   selector: 'app-estatisticas',
@@ -36,6 +36,11 @@ export class Estatisticas {
   );
 
   protected readonly urlOriginal = computed(() => urlLegivel(this.dados.value()?.urlOriginal ?? ''));
+
+  protected readonly endereco = computed(() => {
+    const dados = this.dados.value();
+    return dados ? enderecoDoLinkCurto(dados.urlCurta, dados.codigo) : '';
+  });
 
   protected readonly naoEncontrado = computed(() => {
     const erro = this.dados.error();

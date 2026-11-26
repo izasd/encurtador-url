@@ -6,27 +6,32 @@
   </aside>
 }
 
-<section class="cartao" aria-labelledby="titulo-novo">
-  <h2 id="titulo-novo" class="titulo-cartao">Encurtar um link</h2>
+<section class="secao-novo" aria-labelledby="titulo-novo">
+  <h2 id="titulo-novo" class="titulo-novo">Encurtar um link</h2>
 
+  <!-- Os campos e o botão formam uma barra só, como a barra de endereço do navegador. -->
   <form class="formulario-novo" [formGroup]="formulario" (ngSubmit)="criar()" novalidate>
     <div class="campo campo-url">
       <label for="url">URL original</label>
       <input id="url" type="url" formControlName="urlOriginal" placeholder="https://exemplo.com/um-endereco-bem-longo"
         [attr.aria-invalid]="mensagem('urlOriginal') !== null" aria-describedby="erro-url">
-      @if (mensagem('urlOriginal'); as texto) {
-        <span id="erro-url" class="erro-campo">{{ texto }}</span>
-      }
+      <div class="mensagens">
+        @if (mensagem('urlOriginal'); as texto) {
+          <span id="erro-url" class="erro-campo">{{ texto }}</span>
+        }
+      </div>
     </div>
 
     <div class="campo campo-codigo">
       <label for="codigo">Código personalizado</label>
       <input id="codigo" type="text" formControlName="codigo" placeholder="ex.: promo2026" autocomplete="off"
         spellcheck="false" [attr.aria-invalid]="mensagem('codigo') !== null" aria-describedby="dica-codigo erro-codigo">
-      <span id="dica-codigo" class="dica">Opcional: de 4 a 10 letras ou números. Em branco, geramos um.</span>
-      @if (mensagem('codigo'); as texto) {
-        <span id="erro-codigo" class="erro-campo">{{ texto }}</span>
-      }
+      <div class="mensagens">
+        <span id="dica-codigo" class="dica">Opcional: de 4 a 10 letras ou números. Em branco, geramos um.</span>
+        @if (mensagem('codigo'); as texto) {
+          <span id="erro-codigo" class="erro-campo">{{ texto }}</span>
+        }
+      </div>
     </div>
 
     <button class="botao botao-encurtar" type="submit" [disabled]="enviando()">Encurtar</button>
@@ -37,16 +42,17 @@
   }
 
   @if (criado(); as link) {
-    <output class="alerta alerta-sucesso criado">
-      <span>Link criado: <a [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a></span>
-      <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)">
+    <output class="criado">
+      <span class="criado-texto">Link criado: <a [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a></span>
+      <button type="button" class="botao botao-secundario botao-pequeno" [class.ativo]="copiado() === link.codigo"
+        (click)="copiar(link)">
         {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
       </button>
     </output>
   }
 </section>
 
-<section class="cartao" aria-labelledby="titulo-links">
+<section aria-labelledby="titulo-links">
   <div class="cabecalho-secao">
     <h1 id="titulo-links">Meus links</h1>
     @if (links.hasValue() && itens().length > 0) {
@@ -68,7 +74,7 @@
   } @else if (links.isLoading() && itens().length === 0) {
     <p class="estado">Carregando seus links…</p>
   } @else if (itens().length === 0) {
-    <p class="estado">Você ainda não encurtou nenhum link. Comece pelo formulário acima.</p>
+    <p class="estado">Você ainda não encurtou nenhum link. Cole uma URL no campo acima para criar o primeiro.</p>
   } @else {
     <ul class="lista" [class.recarregando]="links.isLoading()">
       @for (link of itens(); track link.codigo) {
@@ -76,13 +82,14 @@
           <div class="item-linha">
             <div class="item-textos">
               <span class="linha-titulo">
-                <a class="url-curta" [href]="link.urlCurta" target="_blank" rel="noopener">{{ link.urlCurta }}</a>
+                <a class="link-curto url-curta" [href]="link.urlCurta" target="_blank" rel="noopener"><span
+                  class="endereco">{{ link.endereco }}</span><span class="codigo">{{ link.codigo }}</span></a>
                 @switch (link.situacao) {
                   @case ('desativado') {
-                    <span class="selo">Desativado</span>
+                    <span class="selo selo-fora">Desativado</span>
                   }
                   @case ('expirado') {
-                    <span class="selo">Expirado</span>
+                    <span class="selo selo-fora">Expirado</span>
                   }
                   @default {
                     @if (link.expiraEm) {
@@ -92,12 +99,12 @@
                 }
               </span>
               <span class="url-original" [title]="link.urlLegivel">{{ link.urlLegivel }}</span>
-              <span class="criado-em">criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
+              <span class="criado-em">Criado em {{ link.criadoEm | date: 'dd/MM/yyyy' }}</span>
             </div>
 
             <div class="acoes">
-              <button type="button" class="botao botao-secundario botao-pequeno" (click)="copiar(link)"
-                [attr.aria-label]="'Copiar ' + link.urlCurta">
+              <button type="button" class="botao botao-secundario botao-pequeno" [class.ativo]="copiado() === link.codigo"
+                (click)="copiar(link)" [attr.aria-label]="'Copiar ' + link.urlCurta">
                 {{ copiado() === link.codigo ? 'Copiado!' : 'Copiar' }}
               </button>
               <button type="button" class="botao botao-secundario botao-pequeno" (click)="alternarQr(link.codigo)"

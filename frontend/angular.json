@@ -25,6 +25,7 @@
               }
             ],
             "styles": [
+              "node_modules/@fontsource-variable/atkinson-hyperlegible-next/index.css",
               "src/styles.css"
             ]
           },

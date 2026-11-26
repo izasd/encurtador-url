@@ -1,11 +1,12 @@
 :host {
   display: grid;
-  gap: 1.25rem;
+  gap: 2.5rem;
 }
 
 .voltar {
   justify-self: start;
-  font-weight: 600;
+  margin-bottom: -1rem;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -13,12 +14,18 @@
   text-decoration: underline;
 }
 
+/*
+ * O código (para onde o link leva) e o total (quantos foram) no mesmo tamanho:
+ * azul de link de um lado, roxo de link visitado do outro.
+ */
 .cabecalho-estatisticas {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem 2rem;
+  gap: 1.5rem 3rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--texto);
 }
 
 .identificacao {
@@ -28,31 +35,41 @@
   min-width: 0;
 }
 
-.url-curta {
-  font-size: 1.0625rem;
-  font-weight: 600;
-  overflow-wrap: anywhere;
+.identificacao h1 {
+  font-weight: inherit;
+  letter-spacing: normal;
+}
+
+.url-curta .endereco {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.url-curta .codigo {
+  font-size: 3rem;
 }
 
 .url-original {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   color: var(--texto-secundario);
 }
 
-/* O número de destaque da página: grande, na mesma fonte do resto e com algarismos proporcionais. */
 .total {
   display: grid;
   justify-items: end;
 }
 
 .total-numero {
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--visitado);
+  font-variant-numeric: tabular-nums;
 }
 
 .total-rotulo {
@@ -63,7 +80,12 @@
 .grade-categorias {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: 1.25rem;
+  gap: 2.5rem 4rem;
+}
+
+.grade-categorias section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--borda);
 }
 
 .fuso {
@@ -73,10 +95,6 @@
 /* Ao recarregar, os gráficos anteriores continuam visíveis, só mais apagados. */
 .recarregando {
   opacity: 0.6;
-}
-
-.vazio {
-  text-align: center;
 }
 
 .vazio h2 {
@@ -90,7 +108,6 @@
 
 .estado {
   padding: 2rem 0;
-  text-align: center;
   color: var(--texto-secundario);
 }
 
@@ -99,7 +116,8 @@
     justify-items: start;
   }
 
+  .url-curta .codigo,
   .total-numero {
-    font-size: 3rem;
+    font-size: 2.25rem;
   }
 }
