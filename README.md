@@ -2,8 +2,6 @@
 
 Projeto simples de encurtador de URLs feito com Bun, TypeScript e SQLite.
 
-https://encurtador-4qz0.onrender.com
-
 ## Requisitos
 
 - Bun instalado
