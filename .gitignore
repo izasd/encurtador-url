@@ -1,34 +1,12 @@
-# dependencies
-node_modules
+# O backend e o frontend têm o próprio .gitignore (backend/.gitignore e frontend/.gitignore).
+# Aqui ficam só os arquivos que podem aparecer na raiz do repositório.
 
-# output
-out
-dist
-*.tgz
-
-# code coverage
-coverage
-*.lcov
-
-# logs
-logs
-_.log
-report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
-
-# dotenv environment variable files
+# Variáveis locais lidas pelo docker compose (por exemplo, JWT_CHAVE)
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
 
-# caches
-.eslintcache
-.cache
-*.tsbuildinfo
-
-# IntelliJ based IDEs
-.idea
-
-# Finder (MacOS) folder config
+# Editores e sistema operacional
+.vs/
+.idea/
 .DS_Store
+Thumbs.db
