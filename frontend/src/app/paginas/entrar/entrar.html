@@ -1,8 +1,18 @@
 <div class="pagina-conta">
-  <p class="apresentacao">
-    Encurte links, escolha o código se quiser e veja quem clicou: em que dia, de que país,
-    em qual navegador e aparelho.
-  </p>
+  <div class="coluna-apresentacao">
+    <app-apresentacao />
+
+    <section class="visitante" aria-labelledby="titulo-visitante">
+      <h2 id="titulo-visitante">Quer ver antes de criar conta?</h2>
+      <button class="botao" type="button" [disabled]="enviando()" (click)="entrarComoVisitante()">
+        Entrar como visitante
+      </button>
+      <p class="dica">A conta vem com links e cliques de exemplo e é apagada em 24 horas.</p>
+      @if (erroDe('visitante'); as mensagem) {
+        <p class="alerta alerta-erro" role="alert">{{ mensagem }}</p>
+      }
+    </section>
+  </div>
 
   <section class="formulario-conta" aria-labelledby="titulo-entrar">
     <h1 id="titulo-entrar">Entrar</h1>
@@ -32,22 +42,12 @@
         }
       </div>
 
-      @if (erro(); as mensagem) {
+      @if (erroDe('formulario'); as mensagem) {
         <p class="alerta alerta-erro" role="alert">{{ mensagem }}</p>
       }
 
       <button class="botao botao-largo" type="submit" [disabled]="enviando()">Entrar</button>
     </form>
-
-    <p class="separador">ou</p>
-
-    <button class="botao botao-secundario botao-largo" type="button" [disabled]="enviando()"
-      (click)="entrarComoVisitante()">
-      Entrar como visitante
-    </button>
-    <p class="dica nota-visitante">
-      Cria uma conta temporária com links e cliques de exemplo, apagada em 24 horas.
-    </p>
 
     <p class="troca-pagina">Ainda não tem conta? <a routerLink="/cadastro">Criar conta</a></p>
   </section>

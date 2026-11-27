@@ -71,4 +71,18 @@ describe('Entrar', () => {
     await vi.waitFor(() => expect(navegar).toHaveBeenCalledWith('/links'));
     expect(sessao.entrarComoVisitante).toHaveBeenCalled();
   });
+
+  it('mostra o erro da conta de visitante junto do botão de visitante, não no formulário', async () => {
+    sessao.entrarComoVisitante.mockRejectedValue(
+      new HttpErrorResponse({ status: 429, error: { detail: 'Muitas contas de visitante. Tente de novo em 1 hora.' } }),
+    );
+
+    pagina.querySelector<HTMLButtonElement>('.visitante button')!.click();
+
+    await vi.waitFor(() =>
+      expect(pagina.querySelector('.visitante [role="alert"]')?.textContent).toContain('Tente de novo em 1 hora.'),
+    );
+    expect(pagina.querySelector('form [role="alert"]')).toBeNull();
+    expect(navegar).not.toHaveBeenCalled();
+  });
 });

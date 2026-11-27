@@ -329,8 +329,8 @@ a.link-curto:hover .codigo {
 }
 
 /*
- * Login e cadastro: a frase que apresenta o site à esquerda e o formulário à direita.
- * Em telas estreitas, a frase fica em cima, menor.
+ * Login e cadastro: à esquerda, o que o site faz (e, no login, a entrada como visitante);
+ * à direita, o formulário. Em telas estreitas, tudo empilha na mesma ordem.
  */
 .pagina-conta {
   display: grid;
@@ -340,12 +340,23 @@ a.link-curto:hover .codigo {
   padding-top: 1.5rem;
 }
 
-.apresentacao {
-  max-width: 28rem;
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+.coluna-apresentacao {
+  display: grid;
+  gap: 2.5rem;
+}
+
+/* Para quem chega pelo portfólio: ver o site com dados de exemplo, sem criar conta. */
+.visitante {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  max-width: 24rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borda);
+}
+
+.visitante .alerta {
+  justify-self: stretch;
 }
 
 .formulario-conta h1 {
@@ -369,26 +380,6 @@ a.link-curto:hover .codigo {
   margin-bottom: 1.125rem;
 }
 
-.separador {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-  font-size: 0.875rem;
-  color: var(--texto-suave);
-}
-
-.separador::before,
-.separador::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--borda);
-}
-
-.nota-visitante {
-  margin-top: 0.5rem;
-}
-
 .troca-pagina {
   margin-top: 2rem;
   padding-top: 1.25rem;
@@ -404,8 +395,8 @@ a.link-curto:hover .codigo {
     padding-top: 0.5rem;
   }
 
-  .apresentacao {
-    font-size: 1.375rem;
+  .coluna-apresentacao {
+    gap: 1.5rem;
   }
 
   .formulario-conta {
