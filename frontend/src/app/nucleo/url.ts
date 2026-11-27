@@ -1,3 +1,6 @@
+/** Para onde o login leva quando não há outro destino pedido. */
+export const DESTINO_PADRAO = '/links';
+
 /**
  * Destino depois do login: só aceita caminhos internos ("/links/...") para que um link
  * malicioso como "/entrar?voltar=https://site-falso.com" não leve o usuário para fora do app.
@@ -5,7 +8,7 @@
 export function destinoSeguro(voltar: string | null | undefined): string {
   return voltar && voltar.startsWith('/') && !voltar.startsWith('//') && !voltar.startsWith('/\\')
     ? voltar
-    : '/links';
+    : DESTINO_PADRAO;
 }
 
 /**
