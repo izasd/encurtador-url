@@ -1,14 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Demonstracao } from '../../componentes/demonstracao/demonstracao';
 import { lerErros } from '../../nucleo/erros';
 import { Sessao } from '../../nucleo/sessao';
 import { destinoSeguro } from '../../nucleo/url';
 
 @Component({
   selector: 'app-entrar',
-  imports: [ReactiveFormsModule, RouterLink, Demonstracao],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './entrar.html',
 })
 export class Entrar {

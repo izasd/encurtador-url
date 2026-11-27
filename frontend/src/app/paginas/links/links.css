@@ -166,8 +166,8 @@
   gap: 0.25rem 0.75rem;
 }
 
-.url-curta .codigo {
-  font-size: 1.75rem;
+.url-curta {
+  font-size: 1.125rem;
 }
 
 /* Links desativados ou expirados: o código riscado e apagado; o selo diz o motivo. */
@@ -303,10 +303,6 @@
 
   .campo-codigo .mensagens {
     padding-left: 0;
-  }
-
-  .url-curta .codigo {
-    font-size: 1.5rem;
   }
 
   .item-linha .acoes {

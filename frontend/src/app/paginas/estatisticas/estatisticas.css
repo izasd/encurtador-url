@@ -14,10 +14,7 @@
   text-decoration: underline;
 }
 
-/*
- * O código (para onde o link leva) e o total (quantos foram) no mesmo tamanho:
- * azul de link de um lado, roxo de link visitado do outro.
- */
+/* O link curto à esquerda e, à direita, o total de cliques, o número principal da página. */
 .cabecalho-estatisticas {
   display: flex;
   flex-wrap: wrap;
@@ -38,16 +35,6 @@
 .identificacao h1 {
   font-weight: inherit;
   letter-spacing: normal;
-}
-
-.url-curta .endereco {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 1rem;
-}
-
-.url-curta .codigo {
-  font-size: 3rem;
 }
 
 .url-original {
@@ -116,7 +103,6 @@
     justify-items: start;
   }
 
-  .url-curta .codigo,
   .total-numero {
     font-size: 2.25rem;
   }

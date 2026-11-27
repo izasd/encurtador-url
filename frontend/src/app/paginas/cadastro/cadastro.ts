@@ -2,7 +2,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Demonstracao } from '../../componentes/demonstracao/demonstracao';
 import { lerErros } from '../../nucleo/erros';
 import { Sessao } from '../../nucleo/sessao';
 
@@ -16,7 +15,7 @@ const OBRIGATORIO: Record<Campo, string> = {
 
 @Component({
   selector: 'app-cadastro',
-  imports: [ReactiveFormsModule, RouterLink, Demonstracao],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './cadastro.html',
 })
 export class Cadastro {
